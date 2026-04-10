@@ -1,4 +1,5 @@
 vibe-coding
 application
-.env
+.env*
 application-dev.yml
+.claude*
