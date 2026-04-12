@@ -1,6 +1,10 @@
 spring:
   jpa:
     show-sql: false
+    hibernate:
+      ddl-auto: update
+  flyway:
+    enabled: false
   rabbitmq:
     host: ${RABBITMQ_HOST:localhost}
     port: ${RABBITMQ_PORT:5672}

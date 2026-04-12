@@ -12,6 +12,7 @@ RUN gradle dependencies --no-daemon || true
 
 # Copy source and build
 COPY src ./src
+ARG CACHEBUST=1
 RUN gradle bootJar --no-daemon -x test
 
 # ── Stage 2: Runtime ─────────────────────────────────
