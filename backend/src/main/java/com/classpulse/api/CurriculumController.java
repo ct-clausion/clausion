@@ -145,21 +145,26 @@ public class CurriculumController {
         }
 
         var defaults = List.of(
-                new String[]{"변수와 데이터 타입", "변수 선언, 기본 데이터 타입(int, string, boolean 등), 타입 변환", "EASY"},
-                new String[]{"조건문", "if/else, switch/case, 삼항 연산자를 활용한 흐름 제어", "EASY"},
-                new String[]{"반복문", "for, while, do-while 루프와 break/continue 활용", "EASY"},
-                new String[]{"배열과 리스트", "배열 선언, 인덱싱, 슬라이싱, 리스트 조작 메서드", "EASY"},
-                new String[]{"함수와 메서드", "함수 정의, 매개변수, 반환값, 스코프, 순수 함수", "MEDIUM"},
-                new String[]{"문자열 처리", "문자열 메서드, 포매팅, 정규표현식 기초, 파싱", "MEDIUM"},
-                new String[]{"객체지향 프로그래밍", "클래스, 객체, 상속, 다형성, 캡슐화, 추상화", "MEDIUM"},
-                new String[]{"예외 처리", "try/catch, 예외 계층, 커스텀 예외, 에러 핸들링 전략", "MEDIUM"},
-                new String[]{"재귀 함수", "재귀 호출, 기저 조건, 꼬리 재귀, 메모이제이션", "HARD"},
-                new String[]{"자료구조", "스택, 큐, 해시맵, 트리, 그래프의 개념과 활용", "HARD"},
-                new String[]{"정렬과 탐색 알고리즘", "버블/선택/삽입/퀵/병합 정렬, 이진 탐색", "HARD"},
-                new String[]{"클로저와 고차 함수", "클로저 개념, map/filter/reduce, 콜백 패턴", "HARD"},
-                new String[]{"비동기 프로그래밍", "콜백, Promise, async/await, 이벤트 루프", "HARD"},
-                new String[]{"디자인 패턴", "싱글톤, 팩토리, 옵저버, 전략 패턴 등 핵심 패턴", "HARD"},
-                new String[]{"테스트와 디버깅", "단위 테스트, 테스트 주도 개발, 디버깅 기법", "MEDIUM"}
+                new String[]{"Python", "변수, 자료형, 리스트/딕셔너리, 함수, 클래스, 파일 I/O, 예외 처리", "EASY"},
+                new String[]{"Java", "OOP, 제네릭, 컬렉션 프레임워크, 스트림 API, 예외 처리, 멀티스레딩", "MEDIUM"},
+                new String[]{"JavaScript", "ES6+, 클로저, 프로토타입, Promise/async-await, DOM 조작", "MEDIUM"},
+                new String[]{"TypeScript", "타입 시스템, 인터페이스, 제네릭, 유틸리티 타입, 타입 가드", "MEDIUM"},
+                new String[]{"C", "포인터, 메모리 관리, 구조체, 파일 I/O, 전처리기", "HARD"},
+                new String[]{"C++", "OOP, STL, 스마트 포인터, 템플릿, RAII, 이동 시맨틱", "HARD"},
+                new String[]{"C#", ".NET 프레임워크, LINQ, async/await, 델리게이트, 제네릭", "MEDIUM"},
+                new String[]{"Go", "고루틴, 채널, 인터페이스, 에러 처리, 패키지 시스템", "MEDIUM"},
+                new String[]{"Rust", "소유권, 빌림, 라이프타임, 트레이트, 패턴 매칭, Result/Option", "HARD"},
+                new String[]{"Kotlin", "null 안전성, 코루틴, 확장 함수, 데이터 클래스, 시퀀스", "MEDIUM"},
+                new String[]{"Swift", "옵셔널, 프로토콜, 클로저, 구조체 vs 클래스, 에러 처리", "MEDIUM"},
+                new String[]{"SQL", "SELECT/JOIN, 서브쿼리, 인덱스, 트랜잭션, 정규화, 집계 함수", "EASY"},
+                new String[]{"HTML/CSS", "시맨틱 마크업, Flexbox, Grid, 반응형 디자인, 접근성", "EASY"},
+                new String[]{"React", "컴포넌트, Hooks, 상태 관리, JSX, 라이프사이클, Context API", "MEDIUM"},
+                new String[]{"Spring Boot", "DI/IoC, REST API, JPA, Security, AOP, 테스트", "HARD"},
+                new String[]{"Node.js", "Express, 미들웨어, 비동기 I/O, npm, REST API 설계", "MEDIUM"},
+                new String[]{"알고리즘", "정렬, 탐색, DP, 그래프, 그리디, 분할 정복, 시간 복잡도", "HARD"},
+                new String[]{"자료구조", "배열, 연결 리스트, 스택, 큐, 트리, 해시맵, 그래프", "HARD"},
+                new String[]{"Git", "브랜치, 머지, 리베이스, 충돌 해결, PR, 커밋 전략", "EASY"},
+                new String[]{"Docker", "컨테이너, 이미지, Dockerfile, docker-compose, 볼륨, 네트워크", "MEDIUM"}
         );
 
         List<CurriculumSkill> created = new java.util.ArrayList<>();
