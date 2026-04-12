@@ -1,20 +1,28 @@
 package com.classpulse.api;
 
 import com.classpulse.config.SecurityUtil;
+import com.classpulse.domain.codeanalysis.CodeFeedbackRepository;
+import com.classpulse.domain.codeanalysis.CodeSubmission;
+import com.classpulse.domain.codeanalysis.CodeSubmissionRepository;
 import com.classpulse.domain.course.Course;
 import com.classpulse.domain.course.CourseEnrollment;
 import com.classpulse.domain.course.CourseEnrollmentRepository;
 import com.classpulse.domain.course.CourseRepository;
+import com.classpulse.domain.studygroup.StudyGroup;
+import com.classpulse.domain.studygroup.StudyGroupRepository;
 import com.classpulse.domain.twin.StudentTwin;
 import com.classpulse.domain.twin.StudentTwinRepository;
 import com.classpulse.domain.twin.TwinService;
+import com.classpulse.notification.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/instructor")
@@ -25,6 +33,10 @@ public class InstructorStudentController {
     private final CourseRepository courseRepository;
     private final CourseEnrollmentRepository enrollmentRepository;
     private final TwinService twinService;
+    private final NotificationService notificationService;
+    private final CodeSubmissionRepository codeSubmissionRepository;
+    private final CodeFeedbackRepository codeFeedbackRepository;
+    private final StudyGroupRepository studyGroupRepository;
 
     // ── DTOs ──
 
@@ -147,6 +159,14 @@ public class InstructorStudentController {
         enrollment.setStatus("ACTIVE");
         enrollmentRepository.save(enrollment);
 
+        notificationService.createNotification(
+            enrollment.getStudent().getId(),
+            "ENROLLMENT_APPROVED",
+            "수강 승인",
+            enrollment.getCourse().getTitle() + " 과정 수강이 승인되었습니다.",
+            Map.of("courseId", enrollment.getCourse().getId(), "status", "APPROVED")
+        );
+
         // 승인 시 StudentTwin 생성 → 학생 모니터링에 표시
         twinService.getOrCreateTwin(enrollment.getStudent(), enrollment.getCourse());
 
@@ -167,7 +187,63 @@ public class InstructorStudentController {
         }
         enrollment.setStatus("REJECTED");
         enrollmentRepository.save(enrollment);
+
+        notificationService.createNotification(
+            enrollment.getStudent().getId(),
+            "ENROLLMENT_REJECTED",
+            "수강 반려",
+            enrollment.getCourse().getTitle() + " 과정 수강이 반려되었습니다.",
+            Map.of("courseId", enrollment.getCourse().getId(), "status", "REJECTED")
+        );
+
         return ResponseEntity.ok(EnrollmentEntry.from(enrollment));
+    }
+
+    // ── 코드 제출 이력 ──
+
+    @GetMapping("/course/{courseId}/students/{studentId}/code-history")
+    @Transactional(readOnly = true)
+    public ResponseEntity<List<Map<String, Object>>> getStudentCodeHistory(
+            @PathVariable Long courseId, @PathVariable Long studentId) {
+        verifyInstructorOwnsCourse(courseId);
+        List<CodeSubmission> submissions =
+                codeSubmissionRepository.findByStudentIdAndCourseIdOrderByCreatedAtDesc(studentId, courseId);
+        List<Map<String, Object>> result = submissions.stream().map(s -> {
+            int feedbackCount = codeFeedbackRepository.findBySubmissionId(s.getId()).size();
+            Map<String, Object> entry = new LinkedHashMap<>();
+            entry.put("submissionId", s.getId());
+            entry.put("language", s.getLanguage());
+            entry.put("status", s.getStatus());
+            entry.put("feedbackCount", feedbackCount);
+            entry.put("createdAt", s.getCreatedAt() != null ? s.getCreatedAt().toString() : null);
+            return entry;
+        }).toList();
+        return ResponseEntity.ok(result);
+    }
+
+    // ── 스터디 그룹 ──
+
+    @GetMapping("/course/{courseId}/study-groups")
+    @Transactional(readOnly = true)
+    public ResponseEntity<List<Map<String, Object>>> getCourseStudyGroups(@PathVariable Long courseId) {
+        verifyInstructorOwnsCourse(courseId);
+        List<StudyGroup> groups = studyGroupRepository.findByCourseId(courseId);
+        List<Map<String, Object>> result = groups.stream().map(g -> {
+            List<String> memberNames = g.getMembers().stream()
+                    .map(m -> m.getStudent().getName())
+                    .toList();
+            Map<String, Object> entry = new LinkedHashMap<>();
+            entry.put("groupId", g.getId());
+            entry.put("name", g.getName());
+            entry.put("description", g.getDescription());
+            entry.put("status", g.getStatus());
+            entry.put("maxMembers", g.getMaxMembers());
+            entry.put("memberCount", g.getMembers().size());
+            entry.put("memberNames", memberNames);
+            entry.put("createdAt", g.getCreatedAt() != null ? g.getCreatedAt().toString() : null);
+            return entry;
+        }).toList();
+        return ResponseEntity.ok(result);
     }
 
     private void verifyInstructorOwnsCourse(Long courseId) {

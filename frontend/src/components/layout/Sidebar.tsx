@@ -4,7 +4,7 @@ import UserInfoFooter from './UserInfoFooter';
 import { useSidebarStore } from '../../store/sidebarStore';
 
 interface SidebarProps {
-  role: 'student' | 'instructor';
+  role: 'student' | 'instructor' | 'operator';
 }
 
 interface NavItem {
@@ -72,9 +72,47 @@ const instructorNav: NavSection[] = [
   },
 ];
 
+const operatorNav: NavSection[] = [
+  platformNav,
+  {
+    title: '횡단 분석',
+    items: [
+      { id: 'instructors', label: '교강사 분석', icon: '📊', path: 'instructors' },
+      { id: 'intervention', label: '개입 지시', icon: '🚨', path: 'intervention' },
+    ],
+  },
+  {
+    title: '과정 운영',
+    items: [
+      { id: 'courses', label: '과정 편성', icon: '📋', path: 'courses' },
+      { id: 'attendance', label: '출결 관리', icon: '📝', path: 'attendance' },
+    ],
+  },
+  {
+    title: '소통',
+    items: [
+      { id: 'announcements', label: '공지사항', icon: '📢', path: 'announcements' },
+    ],
+  },
+  {
+    title: 'AI 운영',
+    items: [
+      { id: 'reports', label: 'AI 리포트', icon: '📈', path: 'reports' },
+      { id: 'simulation', label: 'AI 시뮬레이션', icon: '🔮', path: 'simulation' },
+    ],
+  },
+  {
+    title: '시스템',
+    items: [
+      { id: 'audit', label: '감사 로그', icon: '🔍', path: 'audit' },
+    ],
+  },
+];
+
 const navByRole: Record<string, NavSection[]> = {
   student: studentNav,
   instructor: instructorNav,
+  operator: operatorNav,
 };
 
 export default function Sidebar({ role }: SidebarProps) {

@@ -9,6 +9,10 @@ import com.classpulse.domain.consultation.ConsultationRepository;
 import com.classpulse.domain.consultation.ConsultationService;
 import com.classpulse.domain.course.AsyncJob;
 import com.classpulse.domain.course.AsyncJobRepository;
+import com.classpulse.domain.course.Course;
+import com.classpulse.domain.course.CourseRepository;
+import com.classpulse.domain.user.User;
+import com.classpulse.domain.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -33,6 +37,8 @@ public class ConsultationController {
     private final AsyncJobRepository asyncJobRepository;
     private final ConsultationAiService consultationAiService;
     private final NotificationService notificationService;
+    private final CourseRepository courseRepository;
+    private final UserRepository userRepository;
 
     // --- DTOs ---
 
@@ -105,6 +111,44 @@ public class ConsultationController {
 
         // Auto-generate briefing asynchronously
         consultationAiService.generateBriefing(consultation.getId());
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(ConsultationResponse.from(consultation));
+    }
+
+    @PostMapping("/request")
+    @Transactional
+    public ResponseEntity<?> requestConsultation(@RequestBody Map<String, Object> body) {
+        Long studentId = SecurityUtil.getCurrentUserId();
+        Long courseId = Long.valueOf(body.get("courseId").toString());
+        String message = body.containsKey("message") ? body.get("message").toString() : "";
+
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new IllegalArgumentException("과정을 찾을 수 없습니다"));
+        if (course.getCreatedBy() == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "해당 과정에 담당 강사가 없습니다"));
+        }
+        Long instructorId = course.getCreatedBy().getId();
+
+        User student = userRepository.findById(studentId)
+                .orElseThrow(() -> new IllegalArgumentException("학생 정보를 찾을 수 없습니다"));
+
+        Consultation consultation = Consultation.builder()
+                .student(student)
+                .instructor(course.getCreatedBy())
+                .course(course)
+                .scheduledAt(LocalDateTime.now().plusDays(7))
+                .status("REQUESTED")
+                .notes(message)
+                .build();
+        consultation = consultationRepository.save(consultation);
+
+        notificationService.createNotification(
+                instructorId,
+                "CONSULTATION_REQUESTED",
+                "새 상담 요청: " + student.getName(),
+                student.getName() + " 학생이 " + course.getTitle() + " 과목 상담을 요청했습니다.",
+                Map.of("consultationId", consultation.getId(), "studentId", studentId, "courseId", courseId)
+        );
 
         return ResponseEntity.status(HttpStatus.CREATED).body(ConsultationResponse.from(consultation));
     }

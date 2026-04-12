@@ -24,6 +24,10 @@ export const consultationsApi = {
     return api.get(`/api/consultations/${consultationId}/briefing`);
   },
 
+  requestConsultation(data: { courseId: number; reason?: string }): Promise<{ id: number; status: string }> {
+    return api.post('/api/consultations/request', data);
+  },
+
   createSummary(
     consultationId: string,
     data: { summaryText: string; actionPlanJson: string },

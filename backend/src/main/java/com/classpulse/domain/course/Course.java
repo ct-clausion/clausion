@@ -43,6 +43,15 @@ public class Course {
     @Builder.Default
     private List<CurriculumSkill> skills = new ArrayList<>();
 
+    @Column(name = "approval_status", length = 20)
+    private String approvalStatus = "APPROVED";
+
+    @Column(name = "approval_note")
+    private String approvalNote;
+
+    @Column(name = "max_capacity")
+    private Integer maxCapacity = 30;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

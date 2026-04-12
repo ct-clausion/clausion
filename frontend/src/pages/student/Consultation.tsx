@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import ConsultationActionCard from '../../components/student/ConsultationActionCard';
 import { consultationsApi } from '../../api/consultations';
+import { useCourseId } from '../../hooks/useCourseId';
 import type { Consultation, ActionPlan } from '../../types';
 
 const PLAN_STATUS_STYLES: Record<
@@ -37,25 +38,90 @@ function parseActionPlans(con: Consultation): ActionPlan[] {
 }
 
 const ConsultationPage: React.FC = () => {
+  const queryClient = useQueryClient();
+  const courseId = useCourseId();
+  const [showRequestForm, setShowRequestForm] = useState(false);
+  const [requestReason, setRequestReason] = useState('');
+
   const { data: consultations, isLoading } = useQuery<Consultation[]>({
     queryKey: ['consultations', 'student'],
     queryFn: () => consultationsApi.getConsultations('student'),
   });
 
+  const requestMutation = useMutation({
+    mutationFn: () => consultationsApi.requestConsultation({
+      courseId: Number(courseId),
+      reason: requestReason || undefined,
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['consultations'] });
+      setShowRequestForm(false);
+      setRequestReason('');
+    },
+  });
+
   const pastConsultations = (consultations ?? []).filter((c) => c.status === 'COMPLETED');
+  const requestedConsultations = (consultations ?? []).filter((c) => c.status === 'REQUESTED');
 
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="sticky top-0 z-30 bg-white/80 backdrop-blur border-b border-slate-100">
-        <div className="max-w-5xl mx-auto px-6 py-3">
-          <h1 className="text-xl font-bold text-slate-900">상담 관리</h1>
-          <p className="text-xs text-slate-500">
-            강사 상담 일정과 실행 계획을 확인하세요
-          </p>
+        <div className="max-w-5xl mx-auto px-6 py-3 flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-bold text-slate-900">상담 관리</h1>
+            <p className="text-xs text-slate-500">
+              강사 상담 일정과 실행 계획을 확인하세요
+            </p>
+          </div>
+          {courseId && (
+            <button
+              onClick={() => setShowRequestForm(!showRequestForm)}
+              className="px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition-colors"
+            >
+              {showRequestForm ? '취소' : '상담 요청'}
+            </button>
+          )}
         </div>
       </header>
 
       <main className="max-w-5xl mx-auto px-6 py-6 space-y-6">
+        {/* Request form */}
+        {showRequestForm && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-2xl bg-indigo-50 border border-indigo-200 p-5"
+          >
+            <h3 className="text-sm font-bold text-indigo-800 mb-2">교강사에게 상담 요청</h3>
+            <textarea
+              value={requestReason}
+              onChange={(e) => setRequestReason(e.target.value)}
+              placeholder="상담을 요청하는 이유를 입력하세요 (선택사항)"
+              rows={3}
+              className="w-full px-4 py-2.5 rounded-lg border border-indigo-200 bg-white text-sm resize-none mb-3"
+            />
+            <button
+              onClick={() => requestMutation.mutate()}
+              disabled={requestMutation.isPending}
+              className="px-6 py-2 rounded-lg bg-indigo-600 text-white text-sm font-bold hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+            >
+              {requestMutation.isPending ? '요청 중...' : '상담 요청 보내기'}
+            </button>
+          </motion.div>
+        )}
+
+        {/* Requested consultations */}
+        {requestedConsultations.length > 0 && (
+          <div className="rounded-2xl bg-amber-50 border border-amber-200 p-5">
+            <h3 className="text-sm font-bold text-amber-800 mb-2">요청 대기 중인 상담</h3>
+            {requestedConsultations.map((c) => (
+              <p key={c.id} className="text-xs text-amber-700">
+                {c.courseTitle ?? '과정'} — 교강사 확인 대기 중
+              </p>
+            ))}
+          </div>
+        )}
+
         {/* Upcoming consultations card */}
         <ConsultationActionCard />
 

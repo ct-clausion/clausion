@@ -19,6 +19,17 @@ import StudentGroupChat from './pages/student/GroupChat';
 import StudentCourseEnroll from './pages/student/CourseEnroll';
 import StudentVideoCall from './pages/student/VideoCall';
 
+// Operator Pages
+import OperatorDashboard from './pages/operator/Dashboard';
+import CourseManagement from './pages/operator/CourseManagement';
+import InstructorAnalysis from './pages/operator/InstructorAnalysis';
+import InterventionCenter from './pages/operator/InterventionCenter';
+import AttendanceManagement from './pages/operator/AttendanceManagement';
+import AnnouncementList from './pages/operator/AnnouncementList';
+import OperationReports from './pages/operator/OperationReports';
+import WhatIfSimulation from './pages/operator/WhatIfSimulation';
+import AuditLog from './pages/operator/AuditLog';
+
 // Instructor Pages
 import InstructorDashboard from './pages/instructor/Dashboard';
 import CurriculumUpload from './pages/instructor/CurriculumUpload';
@@ -104,6 +115,26 @@ export default function App() {
             <Route path="consultations" element={<InstructorConsultations />} />
             <Route path="consultation/:id" element={<InstructorConsultations />} />
             <Route path="consultation/:consultationId/video" element={<InstructorVideoCall />} />
+          </Route>
+
+          {/* Operator routes */}
+          <Route
+            path="/operator"
+            element={
+              <ProtectedRoute allowedRoles={['OPERATOR']}>
+                <AppShell role="operator" />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<OperatorDashboard />} />
+            <Route path="courses" element={<CourseManagement />} />
+            <Route path="instructors" element={<InstructorAnalysis />} />
+            <Route path="intervention" element={<InterventionCenter />} />
+            <Route path="attendance" element={<AttendanceManagement />} />
+            <Route path="announcements" element={<AnnouncementList />} />
+            <Route path="reports" element={<OperationReports />} />
+            <Route path="simulation" element={<WhatIfSimulation />} />
+            <Route path="audit" element={<AuditLog />} />
           </Route>
 
           {/* Catch-all */}

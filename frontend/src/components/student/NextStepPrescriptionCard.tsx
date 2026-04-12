@@ -1,5 +1,6 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { recommendationsApi } from '../../api/recommendations';
 import { useAuthStore } from '../../store/authStore';
@@ -48,6 +49,7 @@ const TYPE_STYLES: Record<string, { accent: string; icon: string }> = {
 };
 
 const NextStepPrescriptionCard: React.FC = () => {
+  const navigate = useNavigate();
   const { user } = useAuthStore();
   const studentId = user?.id?.toString() ?? '';
   const { data: recs } = useQuery<Recommendation[]>({
@@ -105,7 +107,15 @@ const NextStepPrescriptionCard: React.FC = () => {
                     예상: {rec.expectedOutcome}
                   </p>
                 </div>
-                <button className="shrink-0 rounded-lg bg-indigo-50 px-3 py-1.5 text-xs font-medium text-indigo-600 hover:bg-indigo-100 transition-colors">
+                <button
+                  onClick={() => {
+                    const type = rec.recommendationType?.toUpperCase();
+                    if (type === 'REVIEW') navigate('/student/review');
+                    else if (type === 'CONSULTATION') navigate('/student/consultation');
+                    else navigate('/student/review');
+                  }}
+                  className="shrink-0 rounded-lg bg-indigo-50 px-3 py-1.5 text-xs font-medium text-indigo-600 hover:bg-indigo-100 transition-colors"
+                >
                   시작
                 </button>
               </div>

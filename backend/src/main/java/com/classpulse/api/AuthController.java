@@ -50,6 +50,9 @@ public class AuthController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
+        if (role == User.Role.OPERATOR) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
 
         User user = userService.register(request.email(), request.password(), request.name(), role);
 

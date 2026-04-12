@@ -1,43 +1,29 @@
-package com.classpulse.domain.user;
+package com.classpulse.domain.operator;
 
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "users")
+@Table(name = "operator_profiles")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
-public class User {
+public class OperatorProfile {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
-    private String email;
+    @Column(name = "user_id", nullable = false, unique = true)
+    private Long userId;
 
-    @Column(unique = true)
-    private String username;
-
-    @Column(name = "password_hash", nullable = false)
-    private String passwordHash;
-
-    @Column(nullable = false)
-    private String name;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Role role;
+    private String department;
+    private String position;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-    public enum Role {
-        STUDENT, INSTRUCTOR, OPERATOR
-    }
 
     @PrePersist
     protected void onCreate() {

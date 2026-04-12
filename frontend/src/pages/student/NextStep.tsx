@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { recommendationsApi } from '../../api/recommendations';
 import { useCourseId } from '../../hooks/useCourseId';
@@ -116,6 +117,7 @@ const TRIGGER_LABELS: Record<string, string> = {
 type FilterType = 'all' | 'review' | 'practice' | 'consultation' | 'resource';
 
 const NextStep: React.FC = () => {
+  const navigate = useNavigate();
   const [filter, setFilter] = useState<FilterType>('all');
   const { user } = useAuthStore();
   const studentId = user?.id?.toString() ?? '';
@@ -242,7 +244,16 @@ const NextStep: React.FC = () => {
                       <p className="text-xs text-emerald-600 font-medium">
                         예상 효과: {rec.expectedOutcome}
                       </p>
-                      <button className="rounded-lg bg-indigo-600 px-4 py-1.5 text-xs font-medium text-white hover:bg-indigo-700 transition-colors">
+                      <button
+                        onClick={() => {
+                          const type = rec.recommendationType?.toUpperCase();
+                          if (type === 'REVIEW') navigate('/student/review');
+                          else if (type === 'CONSULTATION' || type === 'COURSE') navigate('/student/consultation');
+                          else if (type === 'PRACTICE' || type === 'CHALLENGE') navigate('/student/review');
+                          else navigate('/student/review');
+                        }}
+                        className="rounded-lg bg-indigo-600 px-4 py-1.5 text-xs font-medium text-white hover:bg-indigo-700 transition-colors"
+                      >
                         시작하기
                       </button>
                     </div>

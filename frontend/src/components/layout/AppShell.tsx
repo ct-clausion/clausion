@@ -2,11 +2,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import IncomingCallModal from '../consultation/IncomingCallModal';
+import ChatbotFloatingButton from '../chatbot/ChatbotFloatingButton';
+import ChatbotModal from '../chatbot/ChatbotModal';
 import { useNotifications } from '../../hooks/useNotifications';
 import { useAuthStore } from '../../store/authStore';
 
 interface AppShellProps {
-  role: 'student' | 'instructor';
+  role: 'student' | 'instructor' | 'operator';
 }
 
 interface CallInfo {
@@ -65,13 +67,17 @@ export default function AppShell({ role }: AppShellProps) {
       </main>
 
       {role === 'student' && (
-        <IncomingCallModal
-          visible={!!incomingCall}
-          callerName={incomingCall?.callerName ?? ''}
-          courseName={incomingCall?.courseName}
-          onAccept={handleAccept}
-          onReject={handleReject}
-        />
+        <>
+          <IncomingCallModal
+            visible={!!incomingCall}
+            callerName={incomingCall?.callerName ?? ''}
+            courseName={incomingCall?.courseName}
+            onAccept={handleAccept}
+            onReject={handleReject}
+          />
+          <ChatbotFloatingButton />
+          <ChatbotModal />
+        </>
       )}
     </div>
   );

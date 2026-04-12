@@ -4,7 +4,7 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  role: 'STUDENT' | 'INSTRUCTOR';
+  role: 'STUDENT' | 'INSTRUCTOR' | 'OPERATOR';
 }
 
 export interface StudentProfile {
@@ -32,6 +32,9 @@ export interface Course {
   schedule?: string;
   classTime?: string;
   status: string;
+  approvalStatus?: 'PENDING' | 'APPROVED' | 'REJECTED';
+  approvalNote?: string;
+  maxCapacity?: number;
   createdBy: string;
   createdAt: string;
 }
@@ -326,9 +329,106 @@ export interface LoginResponse {
   user: User;
 }
 
+// OPERATOR accounts are provisioned via admin/seed data, not self-registration
 export interface RegisterRequest {
   email: string;
   password: string;
   name: string;
   role: 'STUDENT' | 'INSTRUCTOR';
+}
+
+// ── Operator Types ──────────────────────────────────────────
+
+export interface CourseTwinSnapshot {
+  id: string;
+  courseId: string;
+  courseTitle?: string;
+  avgMastery: number;
+  avgExecution: number;
+  avgMotivation: number;
+  retentionRiskRatio: number;
+  attendanceRate: number;
+  completionProjection: number;
+  healthScore: number;
+  studentCount: number;
+  atRiskCount: number;
+  snapshotDate: string;
+}
+
+export interface AttendanceRecord {
+  id: string;
+  sessionId: string;
+  studentId: string;
+  studentName?: string;
+  status: 'PRESENT' | 'ABSENT' | 'LATE' | 'EXCUSED';
+  checkInTime?: string;
+  note?: string;
+}
+
+export interface CourseSessionInfo {
+  id: string;
+  courseId: string;
+  sessionDate: string;
+  sessionNumber: number;
+  title?: string;
+  status: string;
+}
+
+export interface Announcement {
+  id: string;
+  title: string;
+  content: string;
+  targetType: 'ALL' | 'COURSE' | 'INSTRUCTOR_ONLY' | 'STUDENT_ONLY';
+  targetCourseId?: string;
+  isUrgent: boolean;
+  authorId: string;
+  authorName?: string;
+  createdAt: string;
+  readCount?: number;
+}
+
+export interface InterventionLog {
+  id: string;
+  studentId: string;
+  studentName?: string;
+  operatorId: string;
+  courseId?: string;
+  courseTitle?: string;
+  interventionType: string;
+  description: string;
+  aiSuggested: boolean;
+  twinScoreBefore?: Record<string, number>;
+  twinScoreAfter?: Record<string, number>;
+  outcome?: string;
+  status: string;
+  createdAt: string;
+  completedAt?: string;
+}
+
+export interface OperatorAuditLog {
+  id: string;
+  operatorId: string;
+  actionType: string;
+  targetType: string;
+  targetId: string;
+  details?: Record<string, unknown>;
+  createdAt: string;
+}
+
+export interface OperatorDashboardSummary {
+  totalCourses: number;
+  activeCourses: number;
+  totalStudents: number;
+  totalInstructors: number;
+  atRiskStudents: number;
+  pendingConsultations: number;
+  todayAttendanceRate: number;
+}
+
+export interface WeeklyKPI {
+  week: string;
+  attendanceRate: number;
+  taskCompletionRate: number;
+  activeUsers: number;
+  consultationCount: number;
 }

@@ -1,33 +1,34 @@
-package com.classpulse.domain.user;
+package com.classpulse.domain.attendance;
 
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "users")
+@Table(name = "attendance_records")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
-public class User {
+public class AttendanceRecord {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
-    private String email;
+    @Column(name = "session_id", nullable = false)
+    private Long sessionId;
 
-    @Column(unique = true)
-    private String username;
-
-    @Column(name = "password_hash", nullable = false)
-    private String passwordHash;
+    @Column(name = "student_id", nullable = false)
+    private Long studentId;
 
     @Column(nullable = false)
-    private String name;
+    private String status;  // PRESENT, ABSENT, LATE, EXCUSED
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Role role;
+    @Column(name = "check_in_time")
+    private LocalDateTime checkInTime;
+
+    @Column(name = "recorded_by")
+    private Long recordedBy;
+
+    private String note;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -35,14 +36,11 @@ public class User {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    public enum Role {
-        STUDENT, INSTRUCTOR, OPERATOR
-    }
-
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+        if (status == null) status = "ABSENT";
     }
 
     @PreUpdate

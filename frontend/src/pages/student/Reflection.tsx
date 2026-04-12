@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { reflectionsApi } from '../../api/reflections';
+import { twinApi } from '../../api/twin';
 import ReflectionTimeline from '../../components/student/ReflectionTimeline';
 import { useCourseId } from '../../hooks/useCourseId';
+import { useAuthStore } from '../../store/authStore';
 
 interface ReflectionForm {
   todayContent: string;
@@ -21,15 +23,44 @@ const initialForm: ReflectionForm = {
   freeText: '',
 };
 
-const AI_REASON = '망각 곡선 분석 결과, 오늘 학습한 재귀 함수 개념의 복습이 3일 후에 필요합니다.';
-const PREV_COMPARISON = '지난 회고에서 자신감 2점이었던 재귀 주제가 오늘 3점으로 상승했습니다.';
-const NEXT_REVIEW_DATE = '2026년 4월 11일 (토)';
-
 const Reflection: React.FC = () => {
   const [form, setForm] = useState<ReflectionForm>(initialForm);
   const [submitted, setSubmitted] = useState(false);
   const courseId = useCourseId();
   const queryClient = useQueryClient();
+  const { user } = useAuthStore();
+  const studentId = user?.id?.toString() ?? '';
+
+  // Fetch Twin data for AI sidebar (replaces hardcoded constants)
+  const { data: twin } = useQuery({
+    queryKey: ['twin', studentId, courseId],
+    queryFn: () => twinApi.getStudentTwin(studentId),
+    enabled: !!studentId,
+  });
+
+  const { data: prevReflections } = useQuery({
+    queryKey: ['reflections', studentId],
+    queryFn: () => reflectionsApi.getReflections(studentId),
+    enabled: !!studentId,
+  });
+
+  // Dynamic AI sidebar content based on real data
+  const aiReason = twin?.aiInsight
+    ?? '학습 데이터가 쌓이면 AI가 맞춤 분석을 제공합니다. 오늘의 회고를 작성해보세요.';
+  const prevComparison = (() => {
+    if (!prevReflections || prevReflections.length < 2) return '이전 회고가 쌓이면 자신감 추이를 비교해드립니다.';
+    const prev = prevReflections[prevReflections.length - 1];
+    const latest = prevReflections[0];
+    const diff = (latest.selfConfidenceScore ?? 0) - (prev.selfConfidenceScore ?? 0);
+    if (diff > 0) return `이전 회고 대비 자신감이 ${diff}점 상승했습니다. 꾸준한 성장이 보입니다!`;
+    if (diff < 0) return `이전 회고 대비 자신감이 ${Math.abs(diff)}점 하락했습니다. 어려운 부분을 복습해보세요.`;
+    return '이전 회고와 동일한 자신감 수준입니다. 꾸준히 유지하고 있어요.';
+  })();
+  const nextReviewDate = (() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 3);
+    return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일 (${['일','월','화','수','목','금','토'][d.getDay()]})`;
+  })();
 
   const mutation = useMutation({
     mutationFn: () => {
@@ -82,7 +113,7 @@ const Reflection: React.FC = () => {
                 <p className="text-sm text-slate-500 mb-4">
                   트윈이 업데이트되었어요. 다음 복습은{' '}
                   <span className="font-semibold text-indigo-600">
-                    {NEXT_REVIEW_DATE}
+                    {nextReviewDate}
                   </span>{' '}
                   에 예정되어 있습니다.
                 </p>
@@ -236,7 +267,7 @@ const Reflection: React.FC = () => {
                 AI 추천 이유
               </h3>
               <p className="text-xs text-indigo-600 leading-relaxed">
-                {AI_REASON}
+                {aiReason}
               </p>
             </div>
 
@@ -246,7 +277,7 @@ const Reflection: React.FC = () => {
                 이전 회고 비교
               </h3>
               <p className="text-xs text-emerald-600 leading-relaxed">
-                {PREV_COMPARISON}
+                {prevComparison}
               </p>
             </div>
 
@@ -256,7 +287,7 @@ const Reflection: React.FC = () => {
                 다음 복습 예정일
               </h3>
               <p className="text-lg font-bold text-amber-700">
-                {NEXT_REVIEW_DATE}
+                {nextReviewDate}
               </p>
               <p className="text-xs text-amber-600 mt-1">
                 망각 곡선 기반 최적 타이밍

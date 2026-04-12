@@ -48,6 +48,8 @@ public class SecurityConfig {
                         .requestMatchers("/actuator/health", "/error").permitAll()
                         // Instructor endpoints
                         .requestMatchers("/api/instructor/**").hasRole("INSTRUCTOR")
+                        // Operator endpoints
+                        .requestMatchers("/api/operator/**").hasRole("OPERATOR")
                         // All other endpoints require authentication
                         .anyRequest().authenticated()
                 )
