@@ -89,8 +89,8 @@ const TwinStateCard: React.FC = () => {
       </div>
 
       {/* Radar Chart */}
-      <div className="flex justify-center my-2 w-full max-w-[220px] mx-auto">
-        <SVGRadarChart data={radarValues} size={200} showLabels />
+      <div className="flex justify-center my-2 w-full max-w-[240px] mx-auto overflow-visible">
+        <SVGRadarChart data={radarValues} size={210} showLabels />
       </div>
 
       {/* AI Insight */}

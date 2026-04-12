@@ -1,10 +1,12 @@
 vibe-coding
 application
-.env.example
 .env
+.env.local
+.env.production
 application-dev.yml
+application-prod.yml
 .claude-octopus
-.claude 
+.claude
 
 ### macOS ###
 .DS_Store

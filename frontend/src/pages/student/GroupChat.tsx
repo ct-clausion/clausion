@@ -35,12 +35,17 @@ export default function GroupChat() {
     queryKey: ['group-chat-history', groupId],
     queryFn: () => groupChatApi.getMessages(groupId!),
     enabled: !!groupId,
+    refetchOnWindowFocus: true,
+    refetchInterval: false,
+    staleTime: 0,
   });
 
-  // Load history into messages
+  // Load history into messages when entering or switching rooms
   useEffect(() => {
-    if (history) setMessages(history);
-  }, [history]);
+    if (history) {
+      setMessages(history);
+    }
+  }, [history, groupId]);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -169,7 +174,7 @@ export default function GroupChat() {
     return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
   };
 
-  const handleFileDownload = async (fileKey: string, fileName: string) => {
+  const handleFileDownload = async (fileKey: string, _fileName: string) => {
     try {
       const baseUrl = import.meta.env.VITE_API_URL ?? '';
       const res = await fetch(`${baseUrl}/api/files/download-url?fileKey=${encodeURIComponent(fileKey)}`, {

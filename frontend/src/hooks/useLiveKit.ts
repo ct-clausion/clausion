@@ -59,7 +59,7 @@ export function useLiveKit({
   );
 
   const connect = useCallback(
-    async (preToken?: string, preRoomName?: string) => {
+    async (preToken?: string, _preRoomName?: string) => {
       if (isConnected || isConnecting) return;
 
       setIsConnecting(true);
@@ -94,7 +94,7 @@ export function useLiveKit({
         // Remote participant events
         room.on(
           RoomEvent.TrackSubscribed,
-          (track, publication, participant) => {
+          (track, _publication, _participant) => {
             if (track.kind === Track.Kind.Video && remoteVideoRef.current) {
               track.attach(remoteVideoRef.current);
             }

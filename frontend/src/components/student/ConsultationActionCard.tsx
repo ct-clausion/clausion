@@ -5,15 +5,18 @@ import { consultationsApi } from '../../api/consultations';
 import type { Consultation, ActionPlan } from '../../types';
 
 
-function parseActionPlans(json: string): ActionPlan[] {
+function parseActionPlans(json: string | null | undefined): ActionPlan[] {
+  if (!json) return [];
   try {
-    return JSON.parse(json);
+    const parsed = JSON.parse(json);
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
   }
 }
 
 const STATUS_LABEL: Record<string, { text: string; color: string }> = {
+  REQUESTED: { text: '요청됨', color: 'text-blue-600 bg-blue-50' },
   SCHEDULED: { text: '예정', color: 'text-indigo-600 bg-indigo-50' },
   COMPLETED: { text: '완료', color: 'text-emerald-600 bg-emerald-50' },
   CANCELLED: { text: '취소', color: 'text-slate-500 bg-slate-100' },

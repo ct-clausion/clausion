@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { reviewsApi } from '../../api/reviews';

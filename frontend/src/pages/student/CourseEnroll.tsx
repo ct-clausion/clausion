@@ -21,6 +21,7 @@ export default function CourseEnroll() {
   const queryClient = useQueryClient();
   const [confirm, setConfirm] = useState<Course | null>(null);
   const [detailId, setDetailId] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState('');
 
   const { data: courses = [], isLoading } = useQuery<Course[]>({
     queryKey: ['all-courses'],
@@ -50,6 +51,8 @@ export default function CourseEnroll() {
       queryClient.invalidateQueries({ queryKey: ['my-enrollments'] });
       queryClient.invalidateQueries({ queryKey: ['all-courses'] });
       setConfirm(null);
+      setSuccessMessage('수강 신청이 완료되었습니다! 교강사 승인을 기다려주세요.');
+      setTimeout(() => setSuccessMessage(''), 4000);
     },
   });
 
@@ -74,6 +77,15 @@ export default function CourseEnroll() {
           <p className="text-xs text-slate-500">개설된 과정을 확인하고 수강 신청하세요</p>
         </div>
       </header>
+
+      {successMessage && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[70] flex items-center gap-3 bg-emerald-600 text-white text-sm font-medium px-5 py-3 rounded-xl shadow-lg">
+          <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+          {successMessage}
+        </div>
+      )}
 
       <main className="max-w-5xl mx-auto px-6 py-6 space-y-4">
         {isLoading && (

@@ -46,15 +46,15 @@ const Reflection: React.FC = () => {
 
   // Dynamic AI sidebar content based on real data
   const aiReason = twin?.aiInsight
-    ?? '학습 데이터가 쌓이면 AI가 맞춤 분석을 제공합니다. 오늘의 회고를 작성해보세요.';
+    ?? '학습 데이터가 쌓이면 AI가 맞춤 분석을 제공합니다. 오늘의 성찰을 작성해보세요.';
   const prevComparison = (() => {
-    if (!prevReflections || prevReflections.length < 2) return '이전 회고가 쌓이면 자신감 추이를 비교해드립니다.';
+    if (!prevReflections || prevReflections.length < 2) return '이전 성찰이 쌓이면 자신감 추이를 비교해드립니다.';
     const prev = prevReflections[prevReflections.length - 1];
     const latest = prevReflections[0];
     const diff = (latest.selfConfidenceScore ?? 0) - (prev.selfConfidenceScore ?? 0);
-    if (diff > 0) return `이전 회고 대비 자신감이 ${diff}점 상승했습니다. 꾸준한 성장이 보입니다!`;
-    if (diff < 0) return `이전 회고 대비 자신감이 ${Math.abs(diff)}점 하락했습니다. 어려운 부분을 복습해보세요.`;
-    return '이전 회고와 동일한 자신감 수준입니다. 꾸준히 유지하고 있어요.';
+    if (diff > 0) return `이전 성찰 대비 자신감이 ${diff}점 상승했습니다. 꾸준한 성장이 보입니다!`;
+    if (diff < 0) return `이전 성찰 대비 자신감이 ${Math.abs(diff)}점 하락했습니다. 어려운 부분을 복습해보세요.`;
+    return '이전 성찰과 동일한 자신감 수준입니다. 꾸준히 유지하고 있어요.';
   })();
   const nextReviewDate = (() => {
     const d = new Date();
@@ -70,7 +70,7 @@ const Reflection: React.FC = () => {
         content: [
           `[오늘 학습] ${form.todayContent}`,
           `[다시 볼 개념] ${form.revisitConcept}`,
-          `[자유 회고] ${form.freeText}`,
+          `[자유 성찰] ${form.freeText}`,
         ].join('\n'),
         stuckPoint: form.stuckPoint,
         selfConfidenceScore: form.confidence,
@@ -89,7 +89,7 @@ const Reflection: React.FC = () => {
     <div className="min-h-screen bg-slate-50">
       <header className="sticky top-0 z-30 bg-white/80 backdrop-blur border-b border-slate-100">
         <div className="max-w-5xl mx-auto px-6 py-3">
-          <h1 className="text-xl font-bold text-slate-900">학습 회고</h1>
+          <h1 className="text-xl font-bold text-slate-900">학습 성찰</h1>
           <p className="text-xs text-slate-500">
             오늘의 학습을 돌아보고 트윈을 업데이트하세요
           </p>
@@ -108,7 +108,7 @@ const Reflection: React.FC = () => {
               >
                 <div className="text-4xl mb-3">🎉</div>
                 <h2 className="text-lg font-bold text-slate-900 mb-2">
-                  회고가 저장되었습니다!
+                  학습 성찰이 저장되었습니다!
                 </h2>
                 <p className="text-sm text-slate-500 mb-4">
                   트윈이 업데이트되었어요. 다음 복습은{' '}
@@ -124,7 +124,7 @@ const Reflection: React.FC = () => {
                   }}
                   className="rounded-xl bg-indigo-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 transition-colors"
                 >
-                  새 회고 작성
+                  새 성찰 작성
                 </button>
               </motion.div>
             ) : (
@@ -204,10 +204,10 @@ const Reflection: React.FC = () => {
                   />
                 </div>
 
-                {/* 자유 회고 */}
+                {/* 자유 성찰 */}
                 <div>
                   <label className="block text-sm font-semibold text-slate-800 mb-1.5">
-                    자유 회고
+                    자유 성찰
                   </label>
                   <textarea
                     value={form.freeText}
@@ -249,7 +249,7 @@ const Reflection: React.FC = () => {
                       저장 중...
                     </>
                   ) : (
-                    '회고 저장 및 트윈 업데이트'
+                    '성찰 저장 및 트윈 업데이트'
                   )}
                 </button>
               </motion.div>
@@ -271,10 +271,10 @@ const Reflection: React.FC = () => {
               </p>
             </div>
 
-            {/* 이전 회고 비교 */}
+            {/* 이전 성찰 비교 */}
             <div className="rounded-2xl bg-emerald-50/60 border border-emerald-100 p-5">
               <h3 className="text-sm font-bold text-emerald-800 mb-2">
-                이전 회고 비교
+                이전 성찰 비교
               </h3>
               <p className="text-xs text-emerald-600 leading-relaxed">
                 {prevComparison}

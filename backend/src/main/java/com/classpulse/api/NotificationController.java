@@ -27,7 +27,7 @@ public class NotificationController {
 
     public record NotificationResponse(
             Long id, String type, String title, String message,
-            Map<String, Object> dataJson, Boolean isRead,
+            Map<String, Object> data, Boolean isRead,
             LocalDateTime createdAt
     ) {
         public static NotificationResponse from(Notification n) {

@@ -4,8 +4,12 @@ import tailwindcss from '@tailwindcss/vite'
 import basicSsl from '@vitejs/plugin-basic-ssl'
 
 // https://vite.dev/config/
-export default defineConfig({
-  plugins: [react(), tailwindcss(), basicSsl()],
+export default defineConfig(({ command }) => ({
+  plugins: [
+    react(),
+    tailwindcss(),
+    ...(command === 'serve' ? [basicSsl()] : []),
+  ],
   server: {
     host: '0.0.0.0',
     proxy: {
@@ -20,4 +24,4 @@ export default defineConfig({
       },
     },
   },
-})
+}))

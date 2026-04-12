@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface IncomingCallModalProps {
@@ -16,8 +16,6 @@ export default function IncomingCallModal({
   onAccept,
   onReject,
 }: IncomingCallModalProps) {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
   useEffect(() => {
     if (visible) {
       // Play ringtone using Web Audio oscillator (no external file needed)

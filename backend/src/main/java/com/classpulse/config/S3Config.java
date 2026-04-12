@@ -11,10 +11,10 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 @Configuration
-@ConditionalOnProperty(name = "app.aws.s3.access-key", matchIfMissing = false)
+@ConditionalOnProperty(name = "app.aws.s3.access-key")
 public class S3Config {
 
-    @Value("${app.aws.s3.region}")
+    @Value("${app.aws.s3.region:ap-northeast-2}")
     private String region;
 
     @Value("${app.aws.s3.access-key}")

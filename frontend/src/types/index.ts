@@ -292,7 +292,7 @@ export interface Notification {
   type: string;
   title: string;
   message: string;
-  dataJson: string;
+  data: Record<string, unknown> | string | null;
   isRead: boolean;
   createdAt: string;
 }

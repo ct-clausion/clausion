@@ -97,7 +97,7 @@ const ReflectionTimeline: React.FC<ReflectionTimelineProps> = ({
 
   return (
     <div className="rounded-2xl bg-white p-6 shadow-sm border border-slate-100">
-      <h2 className="text-lg font-bold text-slate-900 mb-5">회고 타임라인</h2>
+      <h2 className="text-lg font-bold text-slate-900 mb-5">성찰 타임라인</h2>
 
       <div className="relative">
         {/* Vertical line */}

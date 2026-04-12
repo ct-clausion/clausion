@@ -60,7 +60,8 @@ const SVGRadarChart: React.FC<SVGRadarChartProps> = ({
       width={size}
       height={size * (viewH / viewW)}
       viewBox={`0 0 ${viewW} ${viewH}`}
-      className="select-none"
+      className="select-none overflow-visible"
+      style={{ overflow: 'visible' }}
     >
       {/* Grid hexagons */}
       {gridLevels.map((level) => (

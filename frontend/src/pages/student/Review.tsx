@@ -3,7 +3,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { reviewsApi } from '../../api/reviews';
 import ReviewTimeline from '../../components/student/ReviewTimeline';
-import { useCourseId } from '../../hooks/useCourseId';
 import type { ReviewTask } from '../../types';
 
 const MOCK_TASKS: ReviewTask[] = [
@@ -75,7 +74,6 @@ const STATUS_BADGE: Record<string, { label: string; color: string }> = {
 
 const Review: React.FC = () => {
   const [filter, setFilter] = useState<FilterStatus>('all');
-  const courseId = useCourseId();
   const queryClient = useQueryClient();
 
   const { data: tasks } = useQuery<ReviewTask[]>({

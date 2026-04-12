@@ -25,7 +25,7 @@ export default function InterventionCenter() {
     },
   });
 
-  const handleSendDirective = (instructorId: string, studentIds: string[], courseId: string) => {
+  const handleSendDirective = (instructorId: string, studentIds: string[], _courseId: string) => {
     const message = messageText[instructorId] || '해당 학생들에 대한 주의 및 개입을 요청합니다.';
     directiveMutation.mutate({
       instructorId,

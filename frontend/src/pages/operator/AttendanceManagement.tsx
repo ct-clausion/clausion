@@ -102,8 +102,8 @@ export default function AttendanceManagement() {
             className="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm bg-white"
           >
             <option value="">과정을 선택하세요</option>
-            {courses?.map((c: Record<string, unknown>) => (
-              <option key={c.id as string} value={c.id as string}>{c.title as string}</option>
+            {courses?.map((c) => (
+              <option key={c.id} value={c.id}>{c.title}</option>
             ))}
           </select>
         </div>

@@ -8,7 +8,7 @@ interface SidebarNavItemProps {
   badge?: string | number;
 }
 
-export default function SidebarNavItem({ id, label, icon, path, badge }: SidebarNavItemProps) {
+export default function SidebarNavItem({ label, icon, path, badge }: SidebarNavItemProps) {
   const navigate = useNavigate();
   const location = useLocation();
 

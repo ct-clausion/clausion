@@ -83,7 +83,7 @@ export default function Consultations() {
 
   // 요약 모달
   const [summaryModalOpen, setSummaryModalOpen] = useState(false);
-  const [selectedConsultation, setSelectedConsultation] = useState<(Consultation & { studentName: string }) | null>(null);
+  const [selectedConsultation, setSelectedConsultation] = useState<Consultation | null>(null);
 
   const { data: consultations = MOCK_CONSULTATIONS } = useQuery({
     queryKey: ['instructor', 'consultations'],
