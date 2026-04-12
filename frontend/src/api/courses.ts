@@ -25,7 +25,8 @@ export const coursesApi = {
     if (opts?.additionalPrompt) formData.append('additionalPrompt', opts.additionalPrompt);
 
     const token = localStorage.getItem('token');
-    return fetch(`/api/courses/${courseId}/curriculum`, {
+    const BASE_URL = import.meta.env.VITE_API_URL ?? '';
+    return fetch(`${BASE_URL}/api/courses/${courseId}/curriculum`, {
       method: 'POST',
       headers: token ? { Authorization: `Bearer ${token}` } : {},
       body: formData,

@@ -56,11 +56,11 @@ export default function GroupChat() {
   useEffect(() => {
     if (!groupId || !token) return;
 
-    const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-    const wsHost = window.location.host;
+    const apiUrl = import.meta.env.VITE_API_URL ?? '';
+    const wsUrl = apiUrl ? apiUrl.replace(/^http/, 'ws') : `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}`;
 
     const client = new Client({
-      brokerURL: `${wsProtocol}://${wsHost}/ws-chat?token=${token}`,
+      brokerURL: `${wsUrl}/ws-chat?token=${token}`,
       reconnectDelay: 5000,
       heartbeatIncoming: 10000,
       heartbeatOutgoing: 10000,
