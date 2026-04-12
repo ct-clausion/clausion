@@ -52,7 +52,7 @@ export interface CurriculumSkill {
   courseId: string;
   name: string;
   description: string;
-  difficulty: number;
+  difficulty: string;
   prerequisiteIds: number[];
 }
 
