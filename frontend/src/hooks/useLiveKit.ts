@@ -7,6 +7,7 @@ import {
   RemoteParticipant,
   LocalTrackPublication,
 } from 'livekit-client';
+import type { RoomOptions } from 'livekit-client';
 
 interface UseLiveKitOptions {
   consultationId: number;
@@ -104,13 +105,18 @@ export function useLiveKit({
         const livekitUrl =
           import.meta.env.VITE_LIVEKIT_URL ?? 'wss://clausion-3gmrm9tj.livekit.cloud';
 
-        const room = new Room();
+        const roomOpts: RoomOptions = {
+          adaptiveStream: true,
+          dynacast: true,
+        };
+        const room = new Room(roomOpts);
         roomRef.current = room;
 
-        // Remote participant events
+        // Remote participant events - fires when a remote track becomes available
         room.on(
           RoomEvent.TrackSubscribed,
           (track, _publication, _participant) => {
+            console.log('[LiveKit] TrackSubscribed:', track.kind, track.sid);
             if (track.kind === Track.Kind.Video && remoteVideoRef.current) {
               track.attach(remoteVideoRef.current);
             }
@@ -119,6 +125,7 @@ export function useLiveKit({
         );
 
         room.on(RoomEvent.TrackUnsubscribed, (track) => {
+          console.log('[LiveKit] TrackUnsubscribed:', track.kind, track.sid);
           const detachedElements = track.detach();
           detachedElements.forEach((el) => {
             el.remove();
@@ -127,11 +134,21 @@ export function useLiveKit({
         });
 
         room.on(RoomEvent.Disconnected, () => {
+          console.log('[LiveKit] Disconnected');
           isConnectedRef.current = false;
           setIsConnected(false);
         });
 
+        // Log when a new participant connects (for debugging)
+        room.on(RoomEvent.ParticipantConnected, (participant) => {
+          console.log('[LiveKit] ParticipantConnected:', participant.identity);
+        });
+
         await room.connect(livekitUrl, livekitToken!);
+        console.log('[LiveKit] Connected to room:', room.name, 'participants:', room.remoteParticipants.size);
+
+        // Ensure audio playback is allowed (browser autoplay policy)
+        await room.startAudio();
 
         // Publish local camera & mic
         await room.localParticipant.enableCameraAndMicrophone();
@@ -144,10 +161,17 @@ export function useLiveKit({
           }
         });
 
-        // Attach already-connected remote participants
+        // Attach already-connected remote participants' tracks
         room.remoteParticipants.forEach((participant: RemoteParticipant) => {
+          console.log('[LiveKit] Existing remote participant:', participant.identity);
           participant.trackPublications.forEach((pub) => {
-            if (pub.isSubscribed) attachRemoteTrack(pub);
+            if (pub.isSubscribed && pub.track) {
+              console.log('[LiveKit] Attaching existing track:', pub.track.kind);
+              if (pub.track.kind === Track.Kind.Video && remoteVideoRef.current) {
+                pub.track.attach(remoteVideoRef.current);
+              }
+              attachAudioTrack(pub.track);
+            }
           });
         });
 
