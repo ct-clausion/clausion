@@ -47,12 +47,12 @@ export default function PreBriefingPanel({ consultationId }: { consultationId?: 
       try {
         const apiData = await consultationsApi.getConsultationBriefing(consultationId);
         return {
-          studentName: apiData.studentName ?? '',
+          studentName: (apiData as any).studentName ?? '',
           scores: {
-            understanding: apiData.scores?.understanding ?? 0,
-            confidence: apiData.scores?.confidence ?? 0,
-            execution: apiData.scores?.execution ?? 0,
-            forgettingRisk: apiData.scores?.forgettingRisk ?? 0,
+            understanding: (apiData as any).scores?.understanding ?? 0,
+            confidence: (apiData as any).scores?.confidence ?? 0,
+            execution: (apiData as any).scores?.execution ?? 0,
+            forgettingRisk: (apiData as any).scores?.forgettingRisk ?? 0,
           },
           weakSkills: apiData.riskAreas ?? [],
           suggestedQuestions: apiData.suggestedTopics ?? [],

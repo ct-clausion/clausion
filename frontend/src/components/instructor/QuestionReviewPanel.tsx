@@ -3,7 +3,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { questionsApi } from '../../api/questions';
 import { coursesApi } from '../../api/courses';
 import { useCourseId } from '../../hooks/useCourseId';
-import type { Question } from '../../types';
 import TagChip from '../common/TagChip';
 
 const difficultyLabel = (d: number) => {

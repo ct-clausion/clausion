@@ -13,7 +13,6 @@ import { codeAnalysisApi } from '../../api/codeAnalysis';
 import { pollJob } from '../../api/jobs';
 import { useCourseId } from '../../hooks/useCourseId';
 import CodeAIFeedbackSidebar from './CodeAIFeedbackSidebar';
-import type { CodeFeedback } from '../../types';
 
 // ── Line highlight decorations ──────────────────────────────
 
