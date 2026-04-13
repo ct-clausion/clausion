@@ -25,6 +25,10 @@ export const consultationsApi = {
     return api.get(`/api/consultations/${consultationId}/briefing`);
   },
 
+  scheduleConsultation(consultationId: string, scheduledAt: string): Promise<Consultation> {
+    return api.put<Consultation>(`/api/consultations/${consultationId}/schedule`, { scheduledAt });
+  },
+
   requestConsultation(data: { courseId: number; message?: string }): Promise<{ id: number; status: string }> {
     return api.post('/api/consultations/request', data);
   },

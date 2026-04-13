@@ -39,6 +39,7 @@ export default function Consultations() {
   const [scheduleStudentId, setScheduleStudentId] = useState('');
   const [scheduleStudentName, setScheduleStudentName] = useState('');
   const [scheduledAt, setScheduledAt] = useState('');
+  const [scheduleRequestId, setScheduleRequestId] = useState<string | null>(null);
 
   const [studentSearch, setStudentSearch] = useState('');
   const [studentDropdownOpen, setStudentDropdownOpen] = useState(false);
@@ -111,19 +112,25 @@ export default function Consultations() {
 
   // 상담 예약 mutation
   const scheduleMutation = useMutation({
-    mutationFn: () =>
-      consultationsApi.createConsultation({
+    mutationFn: () => {
+      if (scheduleRequestId) {
+        return consultationsApi.scheduleConsultation(scheduleRequestId, scheduledAt);
+      }
+      return consultationsApi.createConsultation({
         studentId: Number(scheduleStudentId),
         instructorId: Number(user?.id ?? 0),
         courseId: Number(courseId),
         scheduledAt,
-      }),
+      });
+    },
     onSuccess: () => {
       setScheduleModalOpen(false);
       setScheduleStudentId('');
       setScheduleStudentName('');
       setScheduledAt('');
+      setScheduleRequestId(null);
       queryClient.invalidateQueries({ queryKey: ['instructor', 'consultations'] });
+      queryClient.invalidateQueries({ queryKey: ['consultations'] });
     },
   });
 
@@ -238,7 +245,8 @@ export default function Consultations() {
                       <span className="text-xs text-slate-400">{date}</span>
                       <button
                         onClick={() => {
-                          setScheduleStudentId(c.studentId);
+                          setScheduleRequestId(String(c.id));
+                          setScheduleStudentId(String(c.studentId));
                           setScheduleStudentName(c.studentName ?? '');
                           setScheduleModalOpen(true);
                         }}
@@ -260,14 +268,17 @@ export default function Consultations() {
             <h2 className="text-sm font-semibold text-slate-800 mb-3">예정된 상담</h2>
             <div className="space-y-2">
               {scheduled.map((c) => {
-                const time = new Date(c.scheduledAt).toLocaleTimeString('ko-KR', {
+                const dt = new Date(c.scheduledAt);
+                const dateTime = dt.toLocaleDateString('ko-KR', {
+                  month: 'short', day: 'numeric', weekday: 'short',
+                }) + ' ' + dt.toLocaleTimeString('ko-KR', {
                   hour: '2-digit', minute: '2-digit',
                 });
                 const cfg = statusLabel[c.status] ?? statusLabel.SCHEDULED;
                 return (
                   <div key={c.id} className="bg-white/85 backdrop-blur-[12px] border border-white/60 rounded-2xl shadow-sm p-4 flex items-center justify-between hover:shadow-md transition-shadow">
                     <div className="flex items-center gap-4">
-                      <span className="text-sm font-mono font-semibold text-indigo-600 w-14">{time}</span>
+                      <span className="text-sm font-mono font-semibold text-indigo-600 w-36">{dateTime}</span>
                       <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-bold text-indigo-700">
                         {(c.studentName ?? '?').charAt(0)}
                       </div>
@@ -340,7 +351,7 @@ export default function Consultations() {
       </main>
 
       {/* 상담 예약 모달 */}
-      <Modal isOpen={scheduleModalOpen} onClose={() => setScheduleModalOpen(false)} title="상담 예약" size="sm">
+      <Modal isOpen={scheduleModalOpen} onClose={() => { setScheduleModalOpen(false); setScheduleRequestId(null); }} title="상담 예약" size="sm">
         <div className="space-y-4">
           <div className="relative" data-student-dropdown>
             <label className="block text-xs font-medium text-slate-600 mb-1">학생 선택</label>
