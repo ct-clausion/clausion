@@ -79,19 +79,29 @@ export default function OperatorDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Course Twin Bar Chart */}
         <GlassCard className="p-5">
-          <h2 className="text-sm font-bold text-slate-900 mb-4">Course Twin - 과정 간 건강도 비교</h2>
+          <h2 className="text-sm font-bold text-slate-900 mb-4">과정 트윈 - 과정 간 건강도 비교</h2>
           {courseTwins && courseTwins.length > 0 ? (
-            <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={courseTwins} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
+            <ResponsiveContainer width="100%" height={260}>
+              <BarChart data={courseTwins} margin={{ top: 10, right: 10, left: -10, bottom: 40 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis dataKey="courseTitle" tick={{ fontSize: 11 }} />
+                <XAxis
+                  dataKey="courseTitle"
+                  tick={{ fontSize: 10 }}
+                  angle={-25}
+                  textAnchor="end"
+                  interval={0}
+                  height={60}
+                />
                 <YAxis tick={{ fontSize: 11 }} domain={[0, 100]} />
-                <Tooltip contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '11px' }} />
-                <Bar dataKey="healthScore" name="건강 점수" fill="#6366f1" radius={[4, 4, 0, 0]} />
+                <Tooltip
+                  contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '11px' }}
+                  cursor={{ fill: 'rgba(99,102,241,0.08)' }}
+                />
+                <Bar dataKey="healthScore" name="건강 점수" fill="#6366f1" radius={[4, 4, 0, 0]} isAnimationActive={false} />
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <p className="text-sm text-slate-400">Course Twin 데이터가 아직 없습니다.</p>
+            <p className="text-sm text-slate-400">과정 트윈 데이터가 아직 없습니다.</p>
           )}
         </GlassCard>
 
@@ -100,25 +110,35 @@ export default function OperatorDashboard() {
           <h2 className="text-sm font-bold text-slate-900 mb-4">교강사 업무 부하</h2>
           {workload && workload.length > 0 ? (
             <div className="space-y-3">
-              {workload.map((inst) => (
-                <div key={inst.id} className="flex items-center gap-3">
-                  <span className="text-sm font-medium text-slate-700 w-20 truncate">{inst.name}</span>
-                  <div className="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full rounded-full ${
-                        inst.isOverloaded ? 'bg-rose-500' : inst.workloadScore > 50 ? 'bg-amber-400' : 'bg-emerald-400'
-                      }`}
-                      style={{ width: `${Math.min(inst.workloadScore, 100)}%` }}
-                    />
+              {workload.map((inst) => {
+                const pct = Math.min(inst.workloadScore, 100);
+                const barColor =
+                  pct >= 90 ? 'bg-rose-500'
+                  : pct >= 70 ? 'bg-orange-400'
+                  : pct >= 50 ? 'bg-amber-400'
+                  : pct >= 30 ? 'bg-sky-400'
+                  : 'bg-emerald-400';
+                return (
+                  <div key={inst.id} className="flex items-center gap-3">
+                    <span className="text-sm font-medium text-slate-700 w-20 truncate">{inst.name}</span>
+                    <div className="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all ${barColor}`}
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                    <span className="text-xs text-slate-500 w-20 text-right font-medium">
+                      {inst.studentCount}/{inst.courseCount * 30}명
+                    </span>
+                    <span className={`text-xs font-bold w-10 text-right ${pct >= 90 ? 'text-rose-600' : pct >= 70 ? 'text-orange-600' : 'text-slate-500'}`}>
+                      {pct.toFixed(0)}%
+                    </span>
+                    {inst.isOverloaded && (
+                      <span className="px-1.5 py-0.5 rounded bg-rose-100 text-rose-700 text-[10px] font-bold">과부하</span>
+                    )}
                   </div>
-                  <span className="text-xs text-slate-500 w-16 text-right">
-                    학생 {inst.studentCount}
-                  </span>
-                  {inst.isOverloaded && (
-                    <span className="px-1.5 py-0.5 rounded bg-rose-100 text-rose-700 text-[10px] font-bold">과부하</span>
-                  )}
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <p className="text-sm text-slate-400">교강사 데이터가 없습니다.</p>
@@ -149,7 +169,11 @@ export default function OperatorDashboard() {
                   </div>
                 </div>
                 <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
-                  alert.overallRisk >= 0.8 ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'
+                  alert.overallRisk >= 0.8 ? 'bg-rose-100 text-rose-700'
+                  : alert.overallRisk >= 0.6 ? 'bg-orange-100 text-orange-700'
+                  : alert.overallRisk >= 0.4 ? 'bg-amber-100 text-amber-700'
+                  : alert.overallRisk >= 0.2 ? 'bg-sky-100 text-sky-700'
+                  : 'bg-emerald-100 text-emerald-700'
                 }`}>
                   {(alert.overallRisk * 100).toFixed(0)}%
                 </span>

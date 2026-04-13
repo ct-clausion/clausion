@@ -3,6 +3,29 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import { operatorApi } from '../../api/operator';
 import GlassCard from '../../components/common/GlassCard';
 
+const summaryKeyLabels: Record<string, string> = {
+  totalStudents: '총 수강생',
+  activeStudents: '활성 수강생',
+  atRiskStudents: '위험 수강생',
+  avgMastery: '평균 숙련도',
+  avgMotivation: '평균 동기',
+  avgAttendance: '평균 출석률',
+  avgAttendanceRate: '평균 출석률',
+  totalConsultations: '총 상담 수',
+  interventionCount: '개입 횟수',
+  completionRate: '수료율',
+  activeCourses: '진행 과정',
+  totalInstructors: '교강사 수',
+  avgOverallRisk: '평균 위험도',
+  newEnrollments: '신규 등록',
+};
+
+const urgencyLabels: Record<string, string> = {
+  HIGH: '긴급',
+  MEDIUM: '보통',
+  LOW: '낮음',
+};
+
 export default function OperationReports() {
   const { data: report, isLoading } = useQuery({
     queryKey: ['operator', 'reports', 'weekly'],
@@ -37,8 +60,8 @@ export default function OperationReports() {
               <YAxis tick={{ fontSize: 12 }} domain={[0, 100]} />
               <Tooltip contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px' }} />
               <Legend wrapperStyle={{ fontSize: '12px' }} />
-              <Bar dataKey="avgMastery" name="숙련도" fill="#6366f1" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="avgMotivation" name="동기" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="avgMastery" name="숙련도" fill="#2563eb" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="avgMotivation" name="동기" fill="#f59e0b" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         ) : (
@@ -78,9 +101,9 @@ export default function OperationReports() {
               ) : (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {Object.entries(report.summary).map(([key, val]) => (
-                    <div key={key} className="p-2 rounded-lg bg-slate-50 text-center">
-                      <p className="text-lg font-bold text-slate-800">{typeof val === 'number' ? val.toFixed(1) : String(val)}</p>
-                      <p className="text-[10px] text-slate-500">{key}</p>
+                    <div key={key} className="p-3 rounded-lg bg-slate-50 text-center">
+                      <p className="text-xl font-bold text-slate-800">{typeof val === 'number' ? val.toFixed(1) : String(val)}</p>
+                      <p className="text-xs font-medium text-slate-500 mt-1">{summaryKeyLabels[key] ?? key}</p>
                     </div>
                   ))}
                 </div>
@@ -130,15 +153,15 @@ export default function OperationReports() {
               <div key={i} className="flex items-center justify-between p-3 rounded-lg border border-slate-200">
                 <div>
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium text-slate-800">{s.studentName}</p>
+                    <p className="text-sm font-bold text-slate-800">{s.studentName}</p>
                     <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
                       s.urgency === 'HIGH' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'
-                    }`}>{s.urgency}</span>
+                    }`}>{urgencyLabels[s.urgency] ?? s.urgency}</span>
                   </div>
                   <p className="text-xs text-slate-500 mt-1">{s.courseTitle}</p>
                   <p className="text-xs text-indigo-600 mt-1">{s.suggestedAction}</p>
                 </div>
-                <p className="text-xs text-slate-400 max-w-[200px] text-right">{s.expectedImpact}</p>
+                <p className="text-sm text-slate-500 max-w-[200px] text-right">{s.expectedImpact}</p>
               </div>
             ))}
           </div>

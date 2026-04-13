@@ -43,7 +43,11 @@ export default function AtRiskStudents() {
                   <div className="flex items-center gap-3">
                     <h3 className="text-sm font-bold text-slate-900">{student.name}</h3>
                     <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
-                      student.overallRisk >= 0.8 ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'
+                      student.overallRisk >= 0.8 ? 'bg-rose-100 text-rose-700'
+                      : student.overallRisk >= 0.6 ? 'bg-orange-100 text-orange-700'
+                      : student.overallRisk >= 0.4 ? 'bg-amber-100 text-amber-700'
+                      : student.overallRisk >= 0.2 ? 'bg-sky-100 text-sky-700'
+                      : 'bg-emerald-100 text-emerald-700'
                     }`}>
                       위험도 {(student.overallRisk * 100).toFixed(0)}%
                     </span>

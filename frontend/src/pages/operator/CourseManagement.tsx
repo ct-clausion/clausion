@@ -29,6 +29,11 @@ export default function CourseManagement() {
     },
   });
 
+  const revokeMutation = useMutation({
+    mutationFn: (id: string) => operatorApi.rejectCourse(id, '승인 해제'),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['operator', 'courses'] }),
+  });
+
   const filtered = courses?.filter((c: Course) =>
     filter === 'ALL' ? true : c.approvalStatus === filter
   );
@@ -97,6 +102,28 @@ export default function CourseManagement() {
                       반려
                     </button>
                   </div>
+                )}
+                {course.approvalStatus === 'APPROVED' && (
+                  <button
+                    onClick={() => {
+                      if (window.confirm('이 과정의 승인을 해제하시겠습니까?')) {
+                        revokeMutation.mutate(course.id);
+                      }
+                    }}
+                    disabled={revokeMutation.isPending}
+                    className="px-4 py-2 rounded-lg bg-amber-500 text-white text-sm font-medium hover:bg-amber-600 disabled:opacity-50 transition-colors"
+                  >
+                    승인 해제
+                  </button>
+                )}
+                {course.approvalStatus === 'REJECTED' && (
+                  <button
+                    onClick={() => approveMutation.mutate(course.id)}
+                    disabled={approveMutation.isPending}
+                    className="px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                  >
+                    재승인
+                  </button>
                 )}
               </div>
 

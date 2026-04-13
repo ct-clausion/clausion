@@ -32,34 +32,45 @@ export default function InstructorAnalysis() {
             <h2 className="text-sm font-bold text-slate-900 mb-4">업무 부하 균형</h2>
             {workload && workload.length > 0 ? (
               <div className="space-y-3">
-                {workload.map((inst) => (
-                  <div key={inst.id} className="flex items-center gap-4">
-                    <div className="w-24 text-sm font-medium text-slate-800 truncate">{inst.name}</div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3">
-                        <div className="flex-1 h-4 bg-slate-100 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full rounded-full transition-all ${
-                              inst.isOverloaded ? 'bg-rose-500' : inst.workloadScore > 50 ? 'bg-amber-400' : 'bg-emerald-400'
-                            }`}
-                            style={{ width: `${Math.min(inst.workloadScore, 100)}%` }}
-                          />
+                {workload.map((inst) => {
+                  const pct = Math.min(inst.workloadScore, 100);
+                  const barColor =
+                    pct >= 90 ? 'bg-rose-500'
+                    : pct >= 70 ? 'bg-orange-400'
+                    : pct >= 50 ? 'bg-amber-400'
+                    : pct >= 30 ? 'bg-sky-400'
+                    : 'bg-emerald-400';
+                  const pctColor =
+                    pct >= 90 ? 'text-rose-600'
+                    : pct >= 70 ? 'text-orange-600'
+                    : 'text-slate-500';
+                  return (
+                    <div key={inst.id} className="flex items-center gap-4">
+                      <div className="w-24 text-sm font-medium text-slate-800 truncate">{inst.name}</div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3">
+                          <div className="flex-1 h-4 bg-slate-100 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full rounded-full transition-all ${barColor}`}
+                              style={{ width: `${pct}%` }}
+                            />
+                          </div>
+                          <span className={`text-xs font-bold w-10 ${pctColor}`}>
+                            {pct.toFixed(0)}%
+                          </span>
                         </div>
-                        <span className={`text-xs font-bold w-8 ${inst.isOverloaded ? 'text-rose-600' : 'text-slate-500'}`}>
-                          {inst.workloadScore.toFixed(0)}
-                        </span>
                       </div>
+                      <div className="flex gap-3 text-xs text-slate-500">
+                        <span>{inst.studentCount}/{inst.courseCount * 30}명</span>
+                        <span>상담 {inst.consultationCount}</span>
+                        <span>과정 {inst.courseCount}</span>
+                      </div>
+                      {inst.isOverloaded && (
+                        <span className="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 text-xs font-bold">과부하</span>
+                      )}
                     </div>
-                    <div className="flex gap-3 text-xs text-slate-500">
-                      <span>학생 {inst.studentCount}</span>
-                      <span>상담 {inst.consultationCount}</span>
-                      <span>과정 {inst.courseCount}</span>
-                    </div>
-                    {inst.isOverloaded && (
-                      <span className="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 text-xs font-bold">과부하</span>
-                    )}
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <p className="text-sm text-slate-400">교강사 데이터가 없습니다.</p>
@@ -79,8 +90,8 @@ export default function InstructorAnalysis() {
                     contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px' }}
                   />
                   <Legend wrapperStyle={{ fontSize: '12px' }} />
-                  <Bar dataKey="avgMastery" name="숙련도" fill="#6366f1" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="avgMotivation" name="동기" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="avgMastery" name="숙련도" fill="#2563eb" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="avgMotivation" name="동기" fill="#f59e0b" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
@@ -103,13 +114,13 @@ export default function InstructorAnalysis() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
-                  <div className="p-2 rounded-lg bg-indigo-50 text-center">
-                    <p className="text-lg font-bold text-indigo-700">{inst.avgMastery.toFixed(0)}</p>
-                    <p className="text-[10px] text-indigo-500">평균 숙련도</p>
+                  <div className="p-2 rounded-lg bg-blue-50 text-center">
+                    <p className="text-lg font-bold text-blue-700">{inst.avgMastery.toFixed(0)}</p>
+                    <p className="text-[10px] text-blue-500">평균 숙련도</p>
                   </div>
-                  <div className="p-2 rounded-lg bg-violet-50 text-center">
-                    <p className="text-lg font-bold text-violet-700">{inst.avgMotivation.toFixed(0)}</p>
-                    <p className="text-[10px] text-violet-500">평균 동기</p>
+                  <div className="p-2 rounded-lg bg-amber-50 text-center">
+                    <p className="text-lg font-bold text-amber-700">{inst.avgMotivation.toFixed(0)}</p>
+                    <p className="text-[10px] text-amber-500">평균 동기</p>
                   </div>
                   <div className="p-2 rounded-lg bg-slate-50 text-center">
                     <p className="text-lg font-bold text-slate-700">{inst.consultationCount}</p>

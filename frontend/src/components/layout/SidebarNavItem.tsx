@@ -12,9 +12,8 @@ export default function SidebarNavItem({ label, icon, path, badge }: SidebarNavI
   const navigate = useNavigate();
   const location = useLocation();
 
-  const isActive = path.endsWith('/')
-    ? location.pathname === path || location.pathname === path.slice(0, -1)
-    : location.pathname === path || location.pathname.startsWith(path + '/');
+  // 정확한 경로 매칭 — /operator/students 와 /operator/students/at-risk 중복 방지
+  const isActive = location.pathname === path || location.pathname === path + '/';
 
   const handleClick = () => {
     navigate(path);
