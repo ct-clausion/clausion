@@ -15,7 +15,7 @@ const summaryKeyLabels: Record<string, string> = {
   interventionCount: '개입 횟수',
   completionRate: '수료율',
   activeCourses: '진행 과정',
-  totalInstructors: '교강사 수',
+  totalInstructors: '강사 수',
   avgOverallRisk: '평균 위험도',
   newEnrollments: '신규 등록',
 };
@@ -51,7 +51,7 @@ export default function OperationReports() {
 
       {/* Instructor Effectiveness Comparison Chart */}
       <GlassCard className="p-5">
-        <h2 className="text-sm font-bold text-slate-900 mb-4">교강사 효과성 비교 (학생 트윈 평균)</h2>
+        <h2 className="text-sm font-bold text-slate-900 mb-4">강사 효과성 비교 (학생 트윈 평균)</h2>
         {effectiveness && effectiveness.length > 0 ? (
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={effectiveness} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
