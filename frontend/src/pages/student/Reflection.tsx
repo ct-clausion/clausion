@@ -11,7 +11,6 @@ interface ReflectionForm {
   todayContent: string;
   stuckPoint: string;
   confidence: number;
-  revisitConcept: string;
   freeText: string;
 }
 
@@ -19,7 +18,6 @@ const initialForm: ReflectionForm = {
   todayContent: '',
   stuckPoint: '',
   confidence: 3,
-  revisitConcept: '',
   freeText: '',
 };
 
@@ -69,7 +67,6 @@ const Reflection: React.FC = () => {
         courseId: Number(courseId),
         content: [
           `[오늘 학습] ${form.todayContent}`,
-          `[다시 볼 개념] ${form.revisitConcept}`,
           `[자유 성찰] ${form.freeText}`,
         ].join('\n'),
         stuckPoint: form.stuckPoint,
@@ -188,20 +185,6 @@ const Reflection: React.FC = () => {
                       {form.confidence}/5
                     </span>
                   </div>
-                </div>
-
-                {/* 다시 보면 좋을 개념 */}
-                <div>
-                  <label className="block text-sm font-semibold text-slate-800 mb-1.5">
-                    다시 보면 좋을 개념
-                  </label>
-                  <input
-                    type="text"
-                    value={form.revisitConcept}
-                    onChange={(e) => update('revisitConcept', e.target.value)}
-                    placeholder="복습이 필요한 개념을 적어주세요"
-                    className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
-                  />
                 </div>
 
                 {/* 자유 성찰 */}
