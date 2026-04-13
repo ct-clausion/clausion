@@ -57,6 +57,8 @@ public class SecurityConfig {
                         .requestMatchers("/ws-chat/**").permitAll()
                         // Health check & error
                         .requestMatchers("/actuator/health", "/error").permitAll()
+                        // Temporary seed endpoint
+                        .requestMatchers("/api/seed/**").permitAll()
                         // Instructor endpoints
                         .requestMatchers("/api/instructor/**").hasRole("INSTRUCTOR")
                         // Operator endpoints
