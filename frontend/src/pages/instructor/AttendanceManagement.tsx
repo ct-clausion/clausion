@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-// TODO: 향후 강사 전용 출결 API 엔드포인트로 마이그레이션 필요
-import { operatorApi } from '../../api/operator';
+import { instructorApi } from '../../api/instructor';
 import GlassCard from '../../components/common/GlassCard';
 
 export default function AttendanceManagement() {
@@ -13,40 +12,40 @@ export default function AttendanceManagement() {
   const [newSessionTitle, setNewSessionTitle] = useState('');
 
   const { data: courses } = useQuery({
-    queryKey: ['operator', 'courses'],
-    queryFn: operatorApi.getCourses,
+    queryKey: ['instructor', 'attendance', 'courses'],
+    queryFn: instructorApi.getAttendanceCourses,
   });
 
   const { data: sessions } = useQuery({
-    queryKey: ['operator', 'sessions', selectedCourseId],
-    queryFn: () => operatorApi.getSessions(selectedCourseId!),
+    queryKey: ['instructor', 'attendance', 'sessions', selectedCourseId],
+    queryFn: () => instructorApi.getAttendanceSessions(selectedCourseId!),
     enabled: !!selectedCourseId,
   });
 
   const { data: records } = useQuery({
-    queryKey: ['operator', 'attendance', selectedSessionId],
-    queryFn: () => operatorApi.getAttendanceRecords(selectedSessionId!),
+    queryKey: ['instructor', 'attendance', 'records', selectedSessionId],
+    queryFn: () => instructorApi.getAttendanceRecords(selectedSessionId!),
     enabled: !!selectedSessionId,
   });
 
   const { data: stats } = useQuery({
-    queryKey: ['operator', 'attendance-stats', selectedCourseId],
-    queryFn: () => operatorApi.getAttendanceStats(selectedCourseId!),
+    queryKey: ['instructor', 'attendance', 'stats', selectedCourseId],
+    queryFn: () => instructorApi.getAttendanceStats(selectedCourseId!),
     enabled: !!selectedCourseId,
   });
 
   const bulkMutation = useMutation({
-    mutationFn: operatorApi.bulkUpdateAttendance,
+    mutationFn: instructorApi.bulkUpdateAttendance,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['operator', 'attendance'] });
-      queryClient.invalidateQueries({ queryKey: ['operator', 'attendance-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['instructor', 'attendance', 'records'] });
+      queryClient.invalidateQueries({ queryKey: ['instructor', 'attendance', 'stats'] });
     },
   });
 
   const createSessionMutation = useMutation({
-    mutationFn: operatorApi.createSession,
+    mutationFn: instructorApi.createAttendanceSession,
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['operator', 'sessions'] });
+      queryClient.invalidateQueries({ queryKey: ['instructor', 'attendance', 'sessions'] });
       setShowNewSession(false);
       setNewSessionTitle('');
       if (data?.id) setSelectedSessionId(data.id);
@@ -90,7 +89,7 @@ export default function AttendanceManagement() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-extrabold text-slate-900">출결 관리</h1>
-        <p className="text-sm text-slate-500 mt-1">과정별 수업 세션 출결 관리 및 통계</p>
+        <p className="text-sm text-slate-500 mt-1">내 과정의 수업 세션 출결 관리 및 통계</p>
       </div>
 
       {/* 과정 선택 */}
