@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -93,10 +95,27 @@ public class CurriculumAnalyzer {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new IllegalArgumentException("Course not found: " + courseId));
 
+        // 과정 기간 계산
+        int totalDays = 0;
+        int weekCount = 0;
+        String durationInfo = "";
+        if (course.getStartDate() != null && course.getEndDate() != null) {
+            totalDays = (int) ChronoUnit.DAYS.between(course.getStartDate(), course.getEndDate()) + 1;
+            weekCount = Math.max(1, (int) Math.ceil(totalDays / 7.0));
+            durationInfo = String.format("""
+                - 시작일: %s
+                - 종료일: %s
+                - 총 기간: %d일 (%d주)
+                ⚠️ 중요: weekly_concepts는 반드시 %d주 이하로 생성하세요. 기간이 7일 미만이면 1주로, 7~13일이면 2주 이하로 생성하세요.
+                """,
+                    course.getStartDate(), course.getEndDate(), totalDays, weekCount, weekCount);
+        }
+
         String userPrompt = String.format("""
                 ## 강의 정보
                 - 강의명: %s
                 - 강의 설명: %s
+                %s
 
                 ## 학습 목표
                 %s
@@ -105,11 +124,14 @@ public class CurriculumAnalyzer {
                 %s
 
                 위 내용을 분석하여 스킬 원자, 선수 지식 관계, 주별 핵심 개념, 흔한 오개념, 복습 포인트를 JSON으로 반환하세요.
+                %s
                 """,
                 course.getTitle(),
                 course.getDescription() != null ? course.getDescription() : "",
+                durationInfo,
                 objectives,
-                materialsText
+                materialsText,
+                weekCount > 0 ? "⚠️ weekly_concepts의 week 수는 최대 " + weekCount + "주까지만 생성하세요!" : ""
         );
 
         Map<String, Object> gptResponse = callGpt4o(SYSTEM_PROMPT, userPrompt);
@@ -149,10 +171,15 @@ public class CurriculumAnalyzer {
             }
         }
 
-        // Save weekly concepts as CourseWeek records
+        // Save weekly concepts as CourseWeek records (과정 기간에 맞게 제한)
         List<Map<String, Object>> weeklyConcepts = getListFromResponse(gptResponse, "weekly_concepts");
         if (!weeklyConcepts.isEmpty() && course.getWeeks().isEmpty()) {
-            for (Map<String, Object> wc : weeklyConcepts) {
+            // AI가 과정 기간보다 많은 주차를 생성했을 수 있으므로 강제 제한
+            int maxWeeks = weekCount > 0 ? weekCount : weeklyConcepts.size();
+            List<Map<String, Object>> limitedWeeks = weeklyConcepts.size() > maxWeeks
+                    ? weeklyConcepts.subList(0, maxWeeks) : weeklyConcepts;
+
+            for (Map<String, Object> wc : limitedWeeks) {
                 int weekNo = wc.get("week") instanceof Number ? ((Number) wc.get("week")).intValue() : 0;
                 String title = (String) wc.getOrDefault("title", "Week " + weekNo);
                 String summary = (String) wc.getOrDefault("summary", "");
@@ -165,7 +192,7 @@ public class CurriculumAnalyzer {
                 course.getWeeks().add(week);
             }
             courseRepository.save(course);
-            log.info("주차 정보 {}개 저장 - courseId={}", weeklyConcepts.size(), courseId);
+            log.info("주차 정보 {}개 저장 (최대 {}주 제한) - courseId={}", limitedWeeks.size(), maxWeeks, courseId);
         }
 
         log.info("커리큘럼 분석 완료 - courseId={}, 스킬 {}개 생성", courseId, savedSkills.size());

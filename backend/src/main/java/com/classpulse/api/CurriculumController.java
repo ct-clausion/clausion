@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.classpulse.domain.course.CourseWeek;
 
 import java.nio.charset.StandardCharsets;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 
@@ -246,11 +247,20 @@ public class CurriculumController {
                 .filter(j -> j.getResultPayload() != null && courseId.equals(toLong(j.getResultPayload().get("courseId"))))
                 .toList();
 
+        // 과정 기간에 따른 최대 주차 수 계산
+        int maxWeeks = Integer.MAX_VALUE;
+        if (course.getStartDate() != null && course.getEndDate() != null) {
+            int totalDays = (int) ChronoUnit.DAYS.between(course.getStartDate(), course.getEndDate()) + 1;
+            maxWeeks = Math.max(1, (int) Math.ceil(totalDays / 7.0));
+        }
+
         for (AsyncJob job : jobs) {
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> weeklyConcepts = (List<Map<String, Object>>) job.getResultPayload().get("weekly_concepts");
             if (weeklyConcepts != null && !weeklyConcepts.isEmpty()) {
-                for (Map<String, Object> wc : weeklyConcepts) {
+                List<Map<String, Object>> limited = weeklyConcepts.size() > maxWeeks
+                        ? weeklyConcepts.subList(0, maxWeeks) : weeklyConcepts;
+                for (Map<String, Object> wc : limited) {
                     int weekNo = wc.get("week") instanceof Number ? ((Number) wc.get("week")).intValue() : 0;
                     course.getWeeks().add(CourseWeek.builder()
                             .course(course)
@@ -264,10 +274,16 @@ public class CurriculumController {
             }
         }
 
-        // No job found — generate default weeks based on skill count
+        // No job found — generate default weeks based on course duration and skill count
         List<CurriculumSkill> skills = skillRepository.findByCourseId(courseId);
         if (!skills.isEmpty()) {
-            int weekCount = Math.max(4, (int) Math.ceil(skills.size() / 3.0));
+            int weekCount;
+            if (course.getStartDate() != null && course.getEndDate() != null) {
+                int totalDays = (int) ChronoUnit.DAYS.between(course.getStartDate(), course.getEndDate()) + 1;
+                weekCount = Math.max(1, (int) Math.ceil(totalDays / 7.0));
+            } else {
+                weekCount = Math.max(4, (int) Math.ceil(skills.size() / 3.0));
+            }
             for (int w = 1; w <= weekCount; w++) {
                 int from = (w - 1) * 3;
                 int to = Math.min(w * 3, skills.size());
