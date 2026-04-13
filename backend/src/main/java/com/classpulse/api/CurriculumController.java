@@ -2,6 +2,7 @@ package com.classpulse.api;
 
 import com.classpulse.ai.CurriculumAnalyzer;
 import com.classpulse.domain.course.*;
+import com.classpulse.domain.twin.SkillMasterySnapshotRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -29,6 +30,7 @@ public class CurriculumController {
     private final CurriculumSkillRepository skillRepository;
     private final AsyncJobRepository asyncJobRepository;
     private final CurriculumAsyncService curriculumAsyncService;
+    private final SkillMasterySnapshotRepository snapshotRepository;
 
     // --- DTOs ---
 
@@ -141,6 +143,7 @@ public class CurriculumController {
         return ResponseEntity.ok(skills.stream().map(SkillResponse::from).toList());
     }
 
+    @Transactional
     @PutMapping("/skills/{skillId}")
     public ResponseEntity<SkillResponse> updateSkill(
             @PathVariable Long courseId,
@@ -310,6 +313,7 @@ public class CurriculumController {
         return null;
     }
 
+    @Transactional
     @DeleteMapping("/skills/{skillId}")
     public ResponseEntity<Void> deleteSkill(
             @PathVariable Long courseId,
@@ -321,6 +325,15 @@ public class CurriculumController {
         if (!skill.getCourse().getId().equals(courseId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
+
+        // Clear all FK references before deleting
+        skillRepository.deletePrerequisiteLinks(skillId);
+        skillRepository.nullifyQuestionSkillLinks(skillId);
+        skillRepository.nullifyCodeFeedbackSkillLinks(skillId);
+        skillRepository.nullifyReviewTaskSkillLinks(skillId);
+        skillRepository.nullifyCodeSubmissionSkillLinks(skillId);
+        skillRepository.nullifyActionPlanSkillLinks(skillId);
+        snapshotRepository.deleteBySkillId(skillId);
 
         skillRepository.delete(skill);
         return ResponseEntity.noContent().build();

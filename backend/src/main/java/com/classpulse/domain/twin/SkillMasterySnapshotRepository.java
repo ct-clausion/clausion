@@ -7,4 +7,5 @@ public interface SkillMasterySnapshotRepository extends JpaRepository<SkillMaste
     List<SkillMasterySnapshot> findByStudentIdAndSkillIdOrderByCapturedAtDesc(Long studentId, Long skillId);
     List<SkillMasterySnapshot> findByStudentIdAndCourseIdOrderByCapturedAtDesc(Long studentId, Long courseId);
     List<SkillMasterySnapshot> findTop10ByStudentIdOrderByCapturedAtDesc(Long studentId);
+    void deleteBySkillId(Long skillId);
 }
