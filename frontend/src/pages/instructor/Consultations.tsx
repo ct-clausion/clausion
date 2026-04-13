@@ -503,26 +503,28 @@ export default function Consultations() {
               </p>
             </div>
 
-            {selectedConsultation.actionPlanJson && selectedConsultation.actionPlanJson !== '[]' && (
-              <div className="p-4 rounded-xl bg-indigo-50 border border-indigo-200">
-                <h4 className="text-xs font-semibold text-indigo-700 uppercase tracking-wider mb-2">액션플랜</h4>
-                <ul className="space-y-1.5">
-                  {(() => {
-                    try {
-                      const plans = JSON.parse(selectedConsultation.actionPlanJson);
-                      return (plans as { task: string; day: string }[]).map((p, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
-                          <span className="text-xs font-semibold text-indigo-600 w-12 flex-shrink-0">{p.day}</span>
-                          {p.task}
-                        </li>
-                      ));
-                    } catch {
-                      return <li className="text-sm text-slate-500">{selectedConsultation.actionPlanJson}</li>;
-                    }
-                  })()}
-                </ul>
-              </div>
-            )}
+            {selectedConsultation.actionPlanJson && (() => {
+              const raw = selectedConsultation.actionPlanJson;
+              const plans: any[] = Array.isArray(raw)
+                ? raw
+                : typeof raw === 'string'
+                  ? (() => { try { return JSON.parse(raw); } catch { return []; } })()
+                  : [];
+              if (plans.length === 0) return null;
+              return (
+                <div className="p-4 rounded-xl bg-indigo-50 border border-indigo-200">
+                  <h4 className="text-xs font-semibold text-indigo-700 uppercase tracking-wider mb-2">액션플랜</h4>
+                  <ul className="space-y-1.5">
+                    {plans.map((p: any, i: number) => (
+                      <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
+                        <span className="text-xs font-semibold text-indigo-600 w-12 flex-shrink-0">{p.day ?? p.dueDate ?? `Day ${i + 1}`}</span>
+                        {p.task ?? p.title ?? ''}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })()}
 
             <div className="text-xs text-slate-400">
               상담일: {new Date(selectedConsultation.scheduledAt).toLocaleDateString('ko-KR', {

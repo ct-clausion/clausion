@@ -5,14 +5,18 @@ import { consultationsApi } from '../../api/consultations';
 import type { Consultation, ActionPlan } from '../../types';
 
 
-function parseActionPlans(json: string | null | undefined): ActionPlan[] {
+function parseActionPlans(json: any): ActionPlan[] {
   if (!json) return [];
-  try {
-    const parsed = JSON.parse(json);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
+  if (Array.isArray(json)) return json;
+  if (typeof json === 'string') {
+    try {
+      const parsed = JSON.parse(json);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
   }
+  return [];
 }
 
 const STATUS_LABEL: Record<string, { text: string; color: string }> = {
