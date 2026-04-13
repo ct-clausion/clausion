@@ -99,6 +99,8 @@ export default function CurriculumUpload() {
     setPhase('loading');
     setAnalysisResult(null);
     setFiles([]);
+    setTarget('');
+    setAdditionalPrompt('');
     setCourseNameInitialized(false);
   };
 
@@ -191,7 +193,7 @@ export default function CurriculumUpload() {
         jobId = res.jobId;
       } else {
         const res = await coursesApi.analyzeCurriculumText(courseId, {
-          courseName: courseName || courses?.[0]?.title || '',
+          courseName: courseName || courses?.find((c) => String(c.id) === courseId)?.title || '',
           target: target || undefined,
           additionalPrompt: additionalPrompt || undefined,
         });
