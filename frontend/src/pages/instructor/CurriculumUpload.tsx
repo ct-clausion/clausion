@@ -64,6 +64,7 @@ export default function CurriculumUpload() {
 
   const [phase, setPhase] = useState<Phase>('loading');
   const [courseName, setCourseName] = useState('');
+  const [courseNameInitialized, setCourseNameInitialized] = useState(false);
   const [target, setTarget] = useState('');
   const [additionalPrompt, setAdditionalPrompt] = useState('');
   const [files, setFiles] = useState<File[]>([]);
@@ -141,6 +142,14 @@ export default function CurriculumUpload() {
       setPhase('input');
     }
   }, [phase, coursesLoading, courseId, existingSkills]);
+
+  // 과정명 자동 채우기
+  useEffect(() => {
+    if (!courseNameInitialized && courses && courses.length > 0) {
+      setCourseName(courses[0].title);
+      setCourseNameInitialized(true);
+    }
+  }, [courses, courseNameInitialized]);
 
   const analyzeMutation = useMutation({
     mutationFn: async () => {
