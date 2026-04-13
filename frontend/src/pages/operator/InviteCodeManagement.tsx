@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../api/client';
 
 interface InviteCode {
@@ -13,45 +14,36 @@ interface InviteCode {
 }
 
 export default function InviteCodeManagement() {
-  const [codes, setCodes] = useState<InviteCode[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [creating, setCreating] = useState(false);
+  const queryClient = useQueryClient();
   const [expiryDays, setExpiryDays] = useState(7);
   const [copiedId, setCopiedId] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const fetchCodes = useCallback(async () => {
-    try {
-      const data = await api.get<InviteCode[]>('/api/operator/invite-codes');
-      setCodes(data);
-    } catch {
-      // ignore
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const { data: codes = [], isLoading: loading } = useQuery({
+    queryKey: ['operator', 'invite-codes'],
+    queryFn: () => api.get<InviteCode[]>('/api/operator/invite-codes'),
+  });
 
-  useEffect(() => { fetchCodes(); }, [fetchCodes]);
+  const createMutation = useMutation({
+    mutationFn: () => api.post<InviteCode>('/api/operator/invite-codes', { expiryDays }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['operator', 'invite-codes'] });
+      setError(null);
+    },
+    onError: (err: Error) => {
+      setError(err.message || '초대 코드 생성에 실패했습니다.');
+    },
+  });
 
-  const handleCreate = async () => {
-    setCreating(true);
-    try {
-      await api.post('/api/operator/invite-codes', { expiryDays });
-      await fetchCodes();
-    } catch {
-      // ignore
-    } finally {
-      setCreating(false);
-    }
-  };
-
-  const handleDelete = async (id: number) => {
-    try {
-      await api.delete(`/api/operator/invite-codes/${id}`);
-      setCodes((prev) => prev.filter((c) => c.id !== id));
-    } catch {
-      // ignore
-    }
-  };
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => api.delete(`/api/operator/invite-codes/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['operator', 'invite-codes'] });
+    },
+    onError: (err: Error) => {
+      setError(err.message || '삭제에 실패했습니다.');
+    },
+  });
 
   const isExpired = (expiresAt: string) => new Date(expiresAt) < new Date();
 
@@ -96,14 +88,21 @@ export default function InviteCodeManagement() {
             </select>
           </div>
           <button
-            onClick={handleCreate}
-            disabled={creating}
+            onClick={() => createMutation.mutate()}
+            disabled={createMutation.isPending}
             className="px-4 py-2 rounded-lg bg-slate-800 text-white text-sm font-medium hover:bg-slate-900 disabled:opacity-50 transition-colors"
           >
-            {creating ? '생성 중...' : '코드 생성'}
+            {createMutation.isPending ? '생성 중...' : '코드 생성'}
           </button>
         </div>
       </div>
+
+      {/* Error message */}
+      {error && (
+        <div className="p-3 rounded-lg bg-rose-50 border border-rose-200">
+          <p className="text-sm text-rose-700">{error}</p>
+        </div>
+      )}
 
       {/* Code list */}
       <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
@@ -157,7 +156,7 @@ export default function InviteCodeManagement() {
                   <td className="px-5 py-3 text-right">
                     {!code.isUsed && (
                       <button
-                        onClick={() => handleDelete(code.id)}
+                        onClick={() => deleteMutation.mutate(code.id)}
                         className="text-xs text-red-500 hover:text-red-700 font-medium"
                       >
                         삭제

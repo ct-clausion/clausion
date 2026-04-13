@@ -69,7 +69,11 @@ export default function InterventionCenter() {
                       <div key={s.studentId} className="flex items-center gap-3">
                         <span className="text-sm text-slate-700">{s.studentName}</span>
                         <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
-                          s.overallRisk >= 0.8 ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'
+                          s.overallRisk >= 0.8 ? 'bg-rose-100 text-rose-700'
+                          : s.overallRisk >= 0.6 ? 'bg-orange-100 text-orange-700'
+                          : s.overallRisk >= 0.4 ? 'bg-amber-100 text-amber-700'
+                          : s.overallRisk >= 0.2 ? 'bg-sky-100 text-sky-700'
+                          : 'bg-emerald-100 text-emerald-700'
                         }`}>
                           {(s.overallRisk * 100).toFixed(0)}%
                         </span>

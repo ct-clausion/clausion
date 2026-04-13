@@ -221,9 +221,7 @@ export default function Sidebar({ role }: SidebarProps) {
                 isCollapsed ? (
                   (() => {
                     const fullPath = `${rolePrefix}/${item.path}`;
-                    const isActive = fullPath.endsWith('/')
-                      ? location.pathname === fullPath || location.pathname === fullPath.slice(0, -1)
-                      : location.pathname === fullPath || location.pathname.startsWith(fullPath + '/');
+                    const isActive = location.pathname === fullPath || location.pathname === fullPath + '/';
                     return (
                       <button
                         key={item.id}

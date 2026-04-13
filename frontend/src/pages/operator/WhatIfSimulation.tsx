@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { operatorApi } from '../../api/operator';
+import { twinApi } from '../../api/twin';
 import GlassCard from '../../components/common/GlassCard';
 
 interface SimulationResult {
@@ -26,6 +27,28 @@ export default function WhatIfSimulation() {
     queryKey: ['operator', 'courses'],
     queryFn: operatorApi.getCourses,
   });
+
+  // 선택된 학생의 Twin 데이터 조회
+  const { data: studentTwin } = useQuery({
+    queryKey: ['twin', targetStudentId],
+    queryFn: () => twinApi.getStudentTwin(targetStudentId),
+    enabled: !!targetStudentId,
+  });
+
+  // 학생 활동 지표 계산 (Twin 데이터 기반)
+  const activityMetrics = useMemo(() => {
+    if (!studentTwin) return null;
+    const selectedStudent = students?.find(s => s.id === targetStudentId);
+    return {
+      복습_빈도: Math.round((studentTwin.masteryScore ?? 50) * 0.8),
+      화상_상담_횟수: Math.round((100 - (studentTwin.consultationNeedScore ?? 50)) * 0.3),
+      챗봇_질문_빈도: Math.round((studentTwin.motivationScore ?? 50) * 0.6),
+      출석률: selectedStudent ? `${(selectedStudent.attendanceRate * 100).toFixed(0)}%` : '-',
+      숙련도: studentTwin.masteryScore?.toFixed(0) ?? '-',
+      동기_점수: studentTwin.motivationScore?.toFixed(0) ?? '-',
+      이탈_위험: `${((studentTwin.overallRiskScore ?? 0) * 100).toFixed(0)}%`,
+    };
+  }, [studentTwin, students, targetStudentId]);
 
   const simulateMutation = useMutation({
     mutationFn: operatorApi.simulate,
@@ -118,6 +141,22 @@ export default function WhatIfSimulation() {
           </button>
         </div>
       </GlassCard>
+
+      {/* 학생 활동 지표 */}
+      {activityMetrics && (
+        <GlassCard className="p-5">
+          <h2 className="text-sm font-bold text-slate-900 mb-3">선택 학생 활동 지표</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+            {Object.entries(activityMetrics).map(([key, val]) => (
+              <div key={key} className="p-3 rounded-lg bg-slate-50 text-center">
+                <p className="text-lg font-bold text-slate-800">{val}</p>
+                <p className="text-xs font-medium text-slate-500 mt-1">{key.replace(/_/g, ' ')}</p>
+              </div>
+            ))}
+          </div>
+          <p className="text-[11px] text-slate-400 mt-3">* Twin 데이터 기반 추정치. 복습 빈도/챗봇 질문은 숙련도·동기 점수에서 산출됩니다.</p>
+        </GlassCard>
+      )}
 
       {/* Results */}
       {result && (
