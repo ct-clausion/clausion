@@ -101,6 +101,7 @@ export default function CurriculumUpload() {
     setFiles([]);
     setTarget('');
     setAdditionalPrompt('');
+    setCourseName('');
     setCourseNameInitialized(false);
   };
 
@@ -133,7 +134,7 @@ export default function CurriculumUpload() {
   });
 
   // 기존 스킬 로드 — 있으면 view, 없으면 input
-  const { data: existingSkills } = useQuery({
+  const { data: existingSkills, isError: skillsError } = useQuery({
     queryKey: ['courses', courseId, 'skills'],
     queryFn: () => coursesApi.getSkills(courseId!),
     enabled: !!courseId,
@@ -144,6 +145,7 @@ export default function CurriculumUpload() {
     if (phase !== 'loading') return;
     if (coursesLoading) return;
     if (!courseId) return; // courseId 없으면 아래 early return에서 처리
+    if (skillsError) { setPhase('input'); return; }
     if (existingSkills === undefined) return;
 
     if (existingSkills.length > 0) {
@@ -165,7 +167,7 @@ export default function CurriculumUpload() {
     } else {
       setPhase('input');
     }
-  }, [phase, coursesLoading, courseId, existingSkills]);
+  }, [phase, coursesLoading, courseId, existingSkills, skillsError]);
 
   // 과정명 자동 채우기 (선택된 과정 기준)
   useEffect(() => {
