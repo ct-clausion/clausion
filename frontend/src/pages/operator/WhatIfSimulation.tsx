@@ -43,7 +43,7 @@ export default function WhatIfSimulation() {
       복습_빈도: Math.round((studentTwin.masteryScore ?? 50) * 0.8),
       화상_상담_횟수: Math.round((100 - (studentTwin.consultationNeedScore ?? 50)) * 0.3),
       챗봇_질문_빈도: Math.round((studentTwin.motivationScore ?? 50) * 0.6),
-      출석률: selectedStudent?.attendanceRate != null ? `${(selectedStudent.attendanceRate * 100).toFixed(0)}%` : '-',
+      출석률: selectedStudent ? `${(selectedStudent.attendanceRate * 100).toFixed(0)}%` : '-',
       숙련도: studentTwin.masteryScore?.toFixed(0) ?? '-',
       동기_점수: studentTwin.motivationScore?.toFixed(0) ?? '-',
       이탈_위험: `${((studentTwin.overallRiskScore ?? 0) * 100).toFixed(0)}%`,

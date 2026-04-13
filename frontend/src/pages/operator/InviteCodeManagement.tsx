@@ -18,33 +18,31 @@ export default function InviteCodeManagement() {
   const queryClient = useQueryClient();
   const [expiryDays, setExpiryDays] = useState(7);
   const [copiedId, setCopiedId] = useState<number | null>(null);
-  const [createError, setCreateError] = useState<string | null>(null);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const { data: codes = [], isLoading } = useQuery<InviteCode[]>({
+  const { data: codes = [], isLoading: loading } = useQuery({
     queryKey: ['operator', 'invite-codes'],
     queryFn: () => api.get<InviteCode[]>('/api/operator/invite-codes'),
   });
 
-  const createMutation = useMutation<InviteCode, Error, void>({
+  const createMutation = useMutation({
     mutationFn: () => api.post<InviteCode>('/api/operator/invite-codes', { expiryDays }),
     onSuccess: () => {
-      setCreateError(null);
       queryClient.invalidateQueries({ queryKey: ['operator', 'invite-codes'] });
+      setError(null);
     },
-    onError: (err) => {
-      setCreateError(err.message || '초대 코드 생성에 실패했습니다.');
+    onError: (err: Error) => {
+      setError(err.message || '초대 코드 생성에 실패했습니다.');
     },
   });
 
-  const deleteMutation = useMutation<void, Error, number>({
-    mutationFn: (id) => api.delete<void>(`/api/operator/invite-codes/${id}`),
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => api.delete(`/api/operator/invite-codes/${id}`),
     onSuccess: () => {
-      setDeleteError(null);
       queryClient.invalidateQueries({ queryKey: ['operator', 'invite-codes'] });
     },
-    onError: (err) => {
-      setDeleteError(err.message || '삭제에 실패했습니다.');
+    onError: (err: Error) => {
+      setError(err.message || '삭제에 실패했습니다.');
     },
   });
 
@@ -127,32 +125,24 @@ export default function InviteCodeManagement() {
             </select>
           </div>
           <button
-            type="button"
-            onClick={handleCreate}
+            onClick={() => createMutation.mutate()}
             disabled={createMutation.isPending}
-            className="px-5 py-2 rounded-lg bg-slate-800 text-white text-sm font-semibold hover:bg-slate-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-4 py-2 rounded-lg bg-slate-800 text-white text-sm font-medium hover:bg-slate-900 disabled:opacity-50 transition-colors"
           >
             {createMutation.isPending ? '생성 중...' : '코드 생성'}
           </button>
         </div>
 
-        {createError && (
-          <div className="mt-3 p-3 rounded-lg bg-rose-50 border border-rose-200">
-            <p className="text-sm text-rose-700">{createError}</p>
-          </div>
-        )}
-      </GlassCard>
-
-      {/* 삭제 오류 */}
-      {deleteError && (
+      {/* Error message */}
+      {error && (
         <div className="p-3 rounded-lg bg-rose-50 border border-rose-200">
-          <p className="text-sm text-rose-700">{deleteError}</p>
+          <p className="text-sm text-rose-700">{error}</p>
         </div>
       )}
 
-      {/* 코드 목록 */}
-      <GlassCard className="overflow-hidden">
-        <div className="px-5 py-3 border-b border-slate-100/80">
+      {/* Code list */}
+      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <div className="px-5 py-3 border-b border-slate-100">
           <h2 className="text-sm font-bold text-slate-800">초대 코드 목록</h2>
         </div>
 
@@ -164,16 +154,54 @@ export default function InviteCodeManagement() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[700px]">
-              <thead>
-                <tr className="text-xs text-slate-500 bg-slate-50/60 border-b border-slate-100">
-                  <th className="text-left px-5 py-2.5 font-semibold">코드</th>
-                  <th className="text-left px-5 py-2.5 font-semibold">상태</th>
-                  <th className="text-left px-5 py-2.5 font-semibold">생성자</th>
-                  <th className="text-left px-5 py-2.5 font-semibold">사용자</th>
-                  <th className="text-left px-5 py-2.5 font-semibold">만료일</th>
-                  <th className="text-left px-5 py-2.5 font-semibold">생성일</th>
-                  <th className="px-5 py-2.5" />
+          <table className="w-full min-w-[700px]">
+            <thead>
+              <tr className="text-xs text-slate-500 border-b border-slate-100">
+                <th className="text-left px-5 py-2 font-medium">코드</th>
+                <th className="text-left px-5 py-2 font-medium">상태</th>
+                <th className="text-left px-5 py-2 font-medium">생성자</th>
+                <th className="text-left px-5 py-2 font-medium">사용자</th>
+                <th className="text-left px-5 py-2 font-medium">만료일</th>
+                <th className="text-left px-5 py-2 font-medium">생성일</th>
+                <th className="text-right px-5 py-2 font-medium"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {codes.map((code) => (
+                <tr key={code.id} className="border-b border-slate-50 hover:bg-slate-50/50">
+                  <td className="px-5 py-3">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-sm font-bold text-slate-900 tracking-wider">{code.code}</span>
+                      {!code.isUsed && !isExpired(code.expiresAt) && (
+                        <button
+                          onClick={() => {
+                            const url = `${window.location.origin}/operator/login`;
+                            navigator.clipboard.writeText(`운영자 초대 코드: ${code.code}\n가입 링크: ${url}`);
+                            setCopiedId(code.id);
+                            setTimeout(() => setCopiedId(null), 2000);
+                          }}
+                          className="px-2 py-0.5 text-[10px] font-medium rounded bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors"
+                        >
+                          {copiedId === code.id ? '복사됨!' : '코드+링크 복사'}
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-5 py-3">{getStatusBadge(code)}</td>
+                  <td className="px-5 py-3 text-sm text-slate-600">{code.createdByName ?? '-'}</td>
+                  <td className="px-5 py-3 text-sm text-slate-600">{code.usedByName ?? '-'}</td>
+                  <td className="px-5 py-3 text-xs text-slate-500">{formatDate(code.expiresAt)}</td>
+                  <td className="px-5 py-3 text-xs text-slate-500">{formatDate(code.createdAt)}</td>
+                  <td className="px-5 py-3 text-right">
+                    {!code.isUsed && (
+                      <button
+                        onClick={() => deleteMutation.mutate(code.id)}
+                        className="text-xs text-red-500 hover:text-red-700 font-medium"
+                      >
+                        삭제
+                      </button>
+                    )}
+                  </td>
                 </tr>
               </thead>
               <tbody>
