@@ -136,7 +136,7 @@ export default function CourseEnroll() {
         {(() => {
           const enrolledCourseIds = new Set(enrollments.map((e) => String(e.courseId)));
           const displayCourses = tab === 'my'
-            ? courses.filter((c) => enrolledCourseIds.has(c.id))
+            ? courses.filter((c) => enrolledCourseIds.has(String(c.id)))
             : courses;
 
           if (!isLoading && displayCourses.length === 0) {

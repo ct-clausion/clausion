@@ -71,7 +71,7 @@ public class CourseController {
                 .endDate(request.endDate())
                 .createdBy(instructor)
                 .status("ACTIVE")
-                .approvalStatus("PENDING")
+                .approvalStatus("APPROVED")
                 .build();
         course = courseRepository.save(course);
 
