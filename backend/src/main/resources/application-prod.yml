@@ -71,7 +71,7 @@ app:
     url: ${LIVEKIT_URL:wss://clausion-3gmrm9tj.livekit.cloud}
 
   cors:
-    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,https://stunning-dedication-production-da63.up.railway.app}
 
   aws:
     s3:
