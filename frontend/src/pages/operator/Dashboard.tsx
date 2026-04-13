@@ -111,12 +111,13 @@ export default function OperatorDashboard() {
           {workload && workload.length > 0 ? (
             <div className="space-y-3">
               {workload.map((inst) => {
-                const pct = Math.min(inst.workloadScore, 100);
+                const cap = inst.totalCapacity ?? 1;
+                const fillPct = cap > 0 ? Math.min(Math.round((inst.studentCount / cap) * 100), 100) : 0;
                 const barColor =
-                  pct >= 90 ? 'bg-rose-500'
-                  : pct >= 70 ? 'bg-orange-400'
-                  : pct >= 50 ? 'bg-amber-400'
-                  : pct >= 30 ? 'bg-sky-400'
+                  fillPct >= 90 ? 'bg-rose-500'
+                  : fillPct >= 70 ? 'bg-orange-400'
+                  : fillPct >= 50 ? 'bg-amber-400'
+                  : fillPct >= 30 ? 'bg-sky-400'
                   : 'bg-emerald-400';
                 return (
                   <div key={inst.id} className="flex items-center gap-3">
@@ -124,14 +125,14 @@ export default function OperatorDashboard() {
                     <div className="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden">
                       <div
                         className={`h-full rounded-full transition-all ${barColor}`}
-                        style={{ width: `${pct}%` }}
+                        style={{ width: `${fillPct}%` }}
                       />
                     </div>
                     <span className="text-xs text-slate-500 w-24 text-right font-medium">
-                      {inst.studentCount}/{inst.totalCapacity ?? '?'}명
+                      {inst.studentCount}/{cap}명
                     </span>
-                    <span className={`text-xs font-bold w-10 text-right ${pct >= 90 ? 'text-rose-600' : pct >= 70 ? 'text-orange-600' : 'text-slate-500'}`}>
-                      {pct.toFixed(0)}%
+                    <span className={`text-xs font-bold w-10 text-right ${fillPct >= 90 ? 'text-rose-600' : fillPct >= 70 ? 'text-orange-600' : 'text-slate-500'}`}>
+                      {fillPct}%
                     </span>
                     {inst.isOverloaded && (
                       <span className="px-1.5 py-0.5 rounded bg-rose-100 text-rose-700 text-[10px] font-bold">과부하</span>
