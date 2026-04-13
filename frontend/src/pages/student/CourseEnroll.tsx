@@ -186,15 +186,21 @@ export default function CourseEnroll() {
                   {course.description && (
                     <p className="text-xs text-slate-500 line-clamp-2">{course.description}</p>
                   )}
-                  <div className="flex items-center gap-3 mt-2 text-[11px] text-slate-400">
-                    <span>
-                      {new Date(course.createdAt).toLocaleDateString('ko-KR', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                      })}
-                      {' 개설'}
-                    </span>
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-[11px] text-slate-400">
+                    {course.startDate && course.endDate ? (
+                      <span>
+                        {new Date(course.startDate).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}
+                        {' ~ '}
+                        {new Date(course.endDate).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}
+                      </span>
+                    ) : (
+                      <span>
+                        {new Date(course.createdAt).toLocaleDateString('ko-KR', { year: 'numeric', month: 'short', day: 'numeric' })}
+                        {' 개설'}
+                      </span>
+                    )}
+                    {course.schedule && <span>{course.schedule}</span>}
+                    {course.classTime && <span>{course.classTime}</span>}
                     {course.maxCapacity && (
                       <span className={(course.enrollmentCount ?? 0) >= course.maxCapacity ? 'text-rose-500 font-medium' : ''}>
                         {course.enrollmentCount ?? 0}/{course.maxCapacity}명
