@@ -228,6 +228,7 @@ export interface StudyGroupMember {
   studentId?: string;
   name: string;
   studentName?: string;
+  role?: string;
   avatarGradient: string;
   strength: string;
   strengthSummary?: string;
@@ -242,6 +243,8 @@ export interface StudyGroup {
   description: string;
   maxMembers: number;
   status: string;
+  createdById?: string;
+  createdByName?: string;
   members: StudyGroupMember[];
 }
 

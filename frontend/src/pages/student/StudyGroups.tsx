@@ -22,7 +22,7 @@ export default function StudyGroups() {
   const [newName, setNewName] = useState('');
   const [newDesc, setNewDesc] = useState('');
   const [newMax, setNewMax] = useState(5);
-  const [confirm, setConfirm] = useState<{ type: 'join' | 'leave'; groupId: string; groupName: string } | null>(null);
+  const [confirm, setConfirm] = useState<{ type: 'join' | 'leave' | 'kick' | 'delete'; groupId: string; groupName: string; targetStudentId?: string; targetName?: string } | null>(null);
 
   // --- Queries ---
   const { data: myGroups = [], isLoading: myLoading } = useQuery<StudyGroup[]>({
@@ -59,6 +59,23 @@ export default function StudyGroups() {
     },
   });
 
+  const kickMut = useMutation({
+    mutationFn: ({ groupId, studentId }: { groupId: string; studentId: string }) =>
+      studyGroupApi.kickMember(groupId, studentId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-study-groups'] });
+      queryClient.invalidateQueries({ queryKey: ['course-study-groups'] });
+    },
+  });
+
+  const deleteMut = useMutation({
+    mutationFn: (groupId: string) => studyGroupApi.deleteGroup(groupId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-study-groups'] });
+      queryClient.invalidateQueries({ queryKey: ['course-study-groups'] });
+    },
+  });
+
   const createMut = useMutation({
     mutationFn: () =>
       studyGroupApi.createStudyGroup({
@@ -79,6 +96,9 @@ export default function StudyGroups() {
 
   const isMember = (group: StudyGroup) =>
     group.members.some((m) => String(m.studentId) === userId);
+
+  const isLeader = (group: StudyGroup) =>
+    group.members.some((m) => String(m.studentId) === userId && m.role === 'LEADER');
 
   const tabs: { key: Tab; label: string }[] = [
     { key: 'my', label: '내 그룹' },
@@ -206,7 +226,11 @@ export default function StudyGroups() {
                 group={group}
                 index={i}
                 isMine
+                isLeader={isLeader(group)}
+                userId={userId}
                 onLeave={() => setConfirm({ type: 'leave', groupId: group.id, groupName: group.name })}
+                onDelete={() => setConfirm({ type: 'delete', groupId: group.id, groupName: group.name })}
+                onKick={(studentId, name) => setConfirm({ type: 'kick', groupId: group.id, groupName: group.name, targetStudentId: studentId, targetName: name })}
                 leaving={leaveMut.isPending}
                 onChat={() => navigate(`/student/study-groups/${group.id}/chat`)}
               />
@@ -305,13 +329,24 @@ export default function StudyGroups() {
             className="relative bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm mx-4"
           >
             <h3 className="text-sm font-bold text-slate-800 mb-2">
-              {confirm.type === 'join' ? '그룹 참여' : '그룹 탈퇴'}
+              {confirm.type === 'join' && '그룹 참여'}
+              {confirm.type === 'leave' && '그룹 탈퇴'}
+              {confirm.type === 'kick' && '멤버 강퇴'}
+              {confirm.type === 'delete' && '그룹 삭제'}
             </h3>
             <p className="text-sm text-slate-600 mb-5">
-              <span className="font-semibold text-slate-800">{confirm.groupName}</span>
-              {confirm.type === 'join'
-                ? ' 그룹에 참여하시겠습니까?'
-                : ' 그룹에서 탈퇴하시겠습니까?'}
+              {confirm.type === 'join' && (
+                <><span className="font-semibold text-slate-800">{confirm.groupName}</span> 그룹에 참여하시겠습니까?</>
+              )}
+              {confirm.type === 'leave' && (
+                <><span className="font-semibold text-slate-800">{confirm.groupName}</span> 그룹에서 탈퇴하시겠습니까?</>
+              )}
+              {confirm.type === 'kick' && (
+                <><span className="font-semibold text-slate-800">{confirm.targetName}</span>님을 그룹에서 내보내시겠습니까?</>
+              )}
+              {confirm.type === 'delete' && (
+                <><span className="font-semibold text-slate-800">{confirm.groupName}</span> 그룹을 삭제하시겠습니까? 채팅 기록도 모두 삭제됩니다.</>
+              )}
             </p>
             <div className="flex gap-2 justify-end">
               <button
@@ -324,8 +359,12 @@ export default function StudyGroups() {
                 onClick={() => {
                   if (confirm.type === 'join') {
                     joinMut.mutate(confirm.groupId);
-                  } else {
+                  } else if (confirm.type === 'leave') {
                     leaveMut.mutate(confirm.groupId);
+                  } else if (confirm.type === 'kick' && confirm.targetStudentId) {
+                    kickMut.mutate({ groupId: confirm.groupId, studentId: confirm.targetStudentId });
+                  } else if (confirm.type === 'delete') {
+                    deleteMut.mutate(confirm.groupId);
                   }
                   setConfirm(null);
                 }}
@@ -335,7 +374,10 @@ export default function StudyGroups() {
                     : 'bg-rose-500 hover:bg-rose-600'
                 }`}
               >
-                {confirm.type === 'join' ? '참여' : '탈퇴'}
+                {confirm.type === 'join' && '참여'}
+                {confirm.type === 'leave' && '탈퇴'}
+                {confirm.type === 'kick' && '강퇴'}
+                {confirm.type === 'delete' && '삭제'}
               </button>
             </div>
           </motion.div>
@@ -351,15 +393,20 @@ interface GroupCardProps {
   group: StudyGroup;
   index: number;
   isMine: boolean;
+  isLeader?: boolean;
+  userId?: string;
   onJoin?: () => void;
   onLeave?: () => void;
+  onDelete?: () => void;
+  onKick?: (studentId: string, name: string) => void;
   onChat?: () => void;
   joining?: boolean;
   leaving?: boolean;
 }
 
-function GroupCard({ group, index, isMine, onJoin, onLeave, onChat, joining, leaving }: GroupCardProps) {
+function GroupCard({ group, index, isMine, isLeader, userId, onJoin, onLeave, onDelete, onKick, onChat, joining, leaving }: GroupCardProps) {
   const isFull = group.members.length >= group.maxMembers;
+  const [showMembers, setShowMembers] = useState(false);
 
   return (
     <motion.div
@@ -370,7 +417,14 @@ function GroupCard({ group, index, isMine, onJoin, onLeave, onChat, joining, lea
     >
       <div className="flex items-start justify-between mb-3">
         <div>
-          <h3 className="text-sm font-bold text-slate-800">{group.name}</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-bold text-slate-800">{group.name}</h3>
+            {isLeader && (
+              <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-600 border border-amber-200">
+                방장
+              </span>
+            )}
+          </div>
           {group.description && (
             <p className="text-xs text-slate-500 mt-0.5">{group.description}</p>
           )}
@@ -391,13 +445,31 @@ function GroupCard({ group, index, isMine, onJoin, onLeave, onChat, joining, lea
                   채팅
                 </button>
               )}
-              <button
-                onClick={onLeave}
-                disabled={leaving}
-                className="px-3 py-1.5 text-xs font-medium rounded-lg border border-rose-200 text-rose-600 hover:bg-rose-50 transition-colors disabled:opacity-50"
-              >
-                {leaving ? '탈퇴 중...' : '탈퇴'}
-              </button>
+              {isLeader && group.members.length > 1 && (
+                <button
+                  onClick={() => setShowMembers(!showMembers)}
+                  className="px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
+                >
+                  관리
+                </button>
+              )}
+              {isLeader ? (
+                <button
+                  onClick={group.members.length <= 1 ? onDelete : onLeave}
+                  disabled={leaving}
+                  className="px-3 py-1.5 text-xs font-medium rounded-lg border border-rose-200 text-rose-600 hover:bg-rose-50 transition-colors disabled:opacity-50"
+                >
+                  {group.members.length <= 1 ? '삭제' : '탈퇴'}
+                </button>
+              ) : (
+                <button
+                  onClick={onLeave}
+                  disabled={leaving}
+                  className="px-3 py-1.5 text-xs font-medium rounded-lg border border-rose-200 text-rose-600 hover:bg-rose-50 transition-colors disabled:opacity-50"
+                >
+                  {leaving ? '탈퇴 중...' : '탈퇴'}
+                </button>
+              )}
             </div>
           ) : (
             <button
@@ -418,11 +490,14 @@ function GroupCard({ group, index, isMine, onJoin, onLeave, onChat, joining, lea
           <div className="flex -space-x-1.5">
             {group.members.slice(0, 5).map((m) => {
               const displayName = m.name || m.studentName || '?';
+              const memberIsLeader = m.role === 'LEADER';
               return (
                 <div
                   key={m.id}
-                  className="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-400 to-violet-500 flex items-center justify-center text-white text-[9px] font-bold border-2 border-white"
-                  title={displayName}
+                  className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-[9px] font-bold border-2 ${
+                    memberIsLeader ? 'border-amber-300 bg-gradient-to-br from-amber-400 to-orange-500' : 'border-white bg-gradient-to-br from-indigo-400 to-violet-500'
+                  }`}
+                  title={`${displayName}${memberIsLeader ? ' (방장)' : ''}`}
                 >
                   {displayName.charAt(0)}
                 </div>
@@ -433,6 +508,48 @@ function GroupCard({ group, index, isMine, onJoin, onLeave, onChat, joining, lea
             <span className="text-[10px] text-slate-400">+{group.members.length - 5}명</span>
           )}
         </div>
+      )}
+
+      {/* Member Management Panel (Leader only) */}
+      {showMembers && isLeader && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          className="mt-3 pt-3 border-t border-slate-100 space-y-2"
+        >
+          <p className="text-[11px] font-semibold text-slate-600 mb-1">멤버 관리</p>
+          {group.members.map((m) => {
+            const displayName = m.name || m.studentName || '?';
+            const memberIsLeader = m.role === 'LEADER';
+            const isMe = String(m.studentId) === userId;
+            return (
+              <div key={m.id} className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-slate-50">
+                <div className="flex items-center gap-2">
+                  <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold ${
+                    memberIsLeader ? 'bg-gradient-to-br from-amber-400 to-orange-500' : 'bg-gradient-to-br from-indigo-400 to-violet-500'
+                  }`}>
+                    {displayName.charAt(0)}
+                  </div>
+                  <span className="text-xs text-slate-700">{displayName}</span>
+                  {memberIsLeader && (
+                    <span className="text-[9px] font-medium text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full">방장</span>
+                  )}
+                  {isMe && !memberIsLeader && (
+                    <span className="text-[9px] text-slate-400">(나)</span>
+                  )}
+                </div>
+                {!memberIsLeader && !isMe && onKick && (
+                  <button
+                    onClick={() => onKick(String(m.studentId), displayName)}
+                    className="px-2 py-1 text-[10px] font-medium rounded-md text-rose-500 hover:bg-rose-50 transition-colors"
+                  >
+                    강퇴
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </motion.div>
       )}
     </motion.div>
   );
