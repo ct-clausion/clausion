@@ -21,6 +21,7 @@ import StudentGroupChat from './pages/student/GroupChat';
 import StudentCourseEnroll from './pages/student/CourseEnroll';
 import StudentVideoCall from './pages/student/VideoCall';
 import StudentAnnouncements from './pages/student/Announcements';
+import StudentAttendance from './pages/student/Attendance';
 
 // Operator Pages
 import OperatorDashboard from './pages/operator/Dashboard';
@@ -104,6 +105,7 @@ export default function App() {
             <Route path="consultation/:id" element={<StudentConsultation />} />
             <Route path="consultation/:consultationId/video" element={<StudentVideoCall />} />
             <Route path="next-step" element={<StudentNextStep />} />
+            <Route path="attendance" element={<StudentAttendance />} />
             <Route path="announcements" element={<StudentAnnouncements />} />
             <Route path="profile" element={<Profile />} />
           </Route>

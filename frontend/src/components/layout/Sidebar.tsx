@@ -33,6 +33,7 @@ const studentNav: NavSection[] = [
     title: '학습',
     items: [
       { id: 'courses', label: '내 과정', icon: '📋', path: 'courses' },
+      { id: 'attendance', label: '출결 관리', icon: '✅', path: 'attendance' },
       { id: 'review', label: '복습 / 성찰', icon: '📝', path: 'review' },
       { id: 'reflection', label: '학습 성찰', icon: '💭', path: 'reflection' },
     ],
