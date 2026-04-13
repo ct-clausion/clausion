@@ -10,4 +10,6 @@ public interface StudyGroupMessageRepository extends JpaRepository<StudyGroupMes
 
     @EntityGraph(attributePaths = {"sender"})
     List<StudyGroupMessage> findByStudyGroupIdOrderByCreatedAtDesc(Long studyGroupId, Pageable pageable);
+
+    void deleteByStudyGroupId(Long studyGroupId);
 }

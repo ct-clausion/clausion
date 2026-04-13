@@ -228,6 +228,7 @@ public class StudyGroupController {
 
         if (shouldDeleteGroup(group)) {
             broadcastRoomDeleted(group, student.getName() + "님이 그룹을 떠나 채팅방이 종료되었습니다.");
+            messageRepository.deleteByStudyGroupId(id);
             studyGroupRepository.delete(group);
             return ResponseEntity.noContent().build();
         }
@@ -299,6 +300,7 @@ public class StudyGroupController {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
 
+        messageRepository.deleteByStudyGroupId(id);
         studyGroupRepository.delete(group);
         return ResponseEntity.noContent().build();
     }
