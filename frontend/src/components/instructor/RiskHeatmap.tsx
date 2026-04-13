@@ -12,8 +12,8 @@ interface HeatmapStudent {
 }
 
 function toRiskLevel(overallRiskScore: number): 'safe' | 'caution' | 'danger' {
-  if (overallRiskScore >= 0.7) return 'danger';
-  if (overallRiskScore >= 0.4) return 'caution';
+  if (overallRiskScore >= 70) return 'danger';
+  if (overallRiskScore >= 40) return 'caution';
   return 'safe';
 }
 

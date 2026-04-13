@@ -7,8 +7,8 @@ interface StudentTwinCardProps {
 }
 
 function riskLevel(score: number): 'safe' | 'caution' | 'danger' {
-  if (score >= 0.7) return 'danger';
-  if (score >= 0.4) return 'caution';
+  if (score >= 70) return 'danger';
+  if (score >= 40) return 'caution';
   return 'safe';
 }
 
@@ -34,7 +34,7 @@ const TREND_LABEL: Record<string, { icon: string; color: string }> = {
 
 export default function StudentTwinCard({ twin, onClick }: StudentTwinCardProps) {
   const risk = riskLevel(twin.overallRiskScore);
-  const riskPercent = Math.round(twin.overallRiskScore * 100);
+  const riskPercent = Math.round(twin.overallRiskScore);
   const trend = twin.trendDirection ? TREND_LABEL[twin.trendDirection] : null;
   const updatedDate = twin.updatedAt
     ? new Date(twin.updatedAt).toLocaleDateString('ko-KR', {

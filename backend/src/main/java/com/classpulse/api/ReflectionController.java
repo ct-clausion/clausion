@@ -141,7 +141,7 @@ public class ReflectionController {
 
                 // Notify instructor if overall risk is high
                 double overallRisk = ((Number) inferenceResult.getOrDefault("overallRiskScore", 0.0)).doubleValue();
-                if (overallRisk >= 0.7) {
+                if (overallRisk >= 70) {
                     // Find the course instructor to notify
                     if (course.getCreatedBy() != null) {
                         notificationService.createNotification(
