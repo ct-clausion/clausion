@@ -58,13 +58,13 @@ public class ReviewController {
         LocalDate today = LocalDate.now();
 
         // Fetch pending/in-progress tasks scheduled for today or earlier (includes overdue)
-        List<ReviewTask> tasks = reviewTaskRepository
+        List<ReviewTask> tasks = new ArrayList<>(reviewTaskRepository
                 .findByStudentIdAndScheduledForLessThanEqualAndStatusIn(
-                        userId, today, List.of("PENDING", "IN_PROGRESS"));
+                        userId, today, List.of("PENDING", "IN_PROGRESS")));
 
         // Filter by courseId if provided
         if (courseId != null) {
-            tasks = tasks.stream().filter(t -> t.getCourse().getId().equals(courseId)).toList();
+            tasks = new ArrayList<>(tasks.stream().filter(t -> t.getCourse().getId().equals(courseId)).toList());
         }
 
         // If no tasks exist, auto-generate from enrolled courses
