@@ -11,7 +11,7 @@ export const coursesApi = {
     return api.get<Course>(`/api/courses/${courseId}`);
   },
 
-  createCourse(data: { title: string; description: string; schedule?: string; classTime?: string; startDate?: string; endDate?: string }): Promise<Course> {
+  createCourse(data: { title: string; description: string; schedule?: string; classTime?: string; startDate?: string; endDate?: string; maxCapacity?: number }): Promise<Course> {
     return api.post<Course>('/api/courses', data);
   },
 

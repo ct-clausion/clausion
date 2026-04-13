@@ -24,14 +24,14 @@ public class CourseController {
 
     // --- DTOs ---
 
-    public record CreateCourseRequest(String title, String description, String schedule, String classTime, LocalDate startDate, LocalDate endDate) {}
+    public record CreateCourseRequest(String title, String description, String schedule, String classTime, LocalDate startDate, LocalDate endDate, Integer maxCapacity) {}
 
     public record CourseResponse(
             Long id, String title, String description, String schedule, String classTime,
             LocalDate startDate, LocalDate endDate,
             String status, String approvalStatus, String approvalNote,
             Long createdById, String createdByName,
-            List<WeekResponse> weeks, int enrollmentCount
+            List<WeekResponse> weeks, int enrollmentCount, Integer maxCapacity
     ) {
         public static CourseResponse from(Course c, int enrollmentCount) {
             List<WeekResponse> weeks = c.getWeeks().stream()
@@ -46,7 +46,7 @@ public class CourseController {
                     c.getApprovalNote(),
                     c.getCreatedBy() != null ? c.getCreatedBy().getId() : null,
                     c.getCreatedBy() != null ? c.getCreatedBy().getName() : null,
-                    weeks, enrollmentCount
+                    weeks, enrollmentCount, c.getMaxCapacity()
             );
         }
     }
@@ -72,6 +72,7 @@ public class CourseController {
                 .classTime(request.classTime())
                 .startDate(request.startDate())
                 .endDate(request.endDate())
+                .maxCapacity(request.maxCapacity() != null ? request.maxCapacity() : 30)
                 .createdBy(instructor)
                 .status("ACTIVE")
                 .approvalStatus("APPROVED")
@@ -133,6 +134,16 @@ public class CourseController {
 
         Course course = courseRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Course not found: " + id));
+
+        // Capacity check
+        if (course.getMaxCapacity() != null) {
+            long currentCount = enrollmentRepository.countByCourseIdAndStatus(id, "ACTIVE")
+                    + enrollmentRepository.countByCourseIdAndStatus(id, "PENDING");
+            if (currentCount >= course.getMaxCapacity()) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body(java.util.Map.of("message", "정원이 초과되어 수강 신청이 불가합니다."));
+            }
+        }
 
         // Date overlap check with ACTIVE/PENDING enrollments
         if (course.getStartDate() != null && course.getEndDate() != null) {

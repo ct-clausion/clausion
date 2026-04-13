@@ -13,6 +13,7 @@ export default function CourseCreate() {
   const [classTime, setClassTime] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [maxCapacity, setMaxCapacity] = useState('30');
 
   const days = ['월', '화', '수', '목', '금', '토', '일'];
   const selectedDays = schedule ? schedule.split(',').filter(Boolean) : [];
@@ -32,6 +33,7 @@ export default function CourseCreate() {
         classTime: classTime || undefined,
         startDate: startDate || undefined,
         endDate: endDate || undefined,
+        maxCapacity: maxCapacity ? Number(maxCapacity) : undefined,
       }),
     onSuccess: (course) => {
       queryClient.invalidateQueries({ queryKey: ['courses'] });
@@ -136,6 +138,22 @@ export default function CourseCreate() {
             placeholder="예: 10:00 ~ 12:00"
             className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all"
           />
+        </div>
+
+        <div className="bg-white/85 backdrop-blur-[12px] border border-white/60 rounded-2xl shadow-lg p-6">
+          <label className="block text-sm font-semibold text-slate-800 mb-2">정원</label>
+          <div className="flex items-center gap-3">
+            <input
+              type="number"
+              min={1}
+              max={500}
+              value={maxCapacity}
+              onChange={(e) => setMaxCapacity(e.target.value)}
+              className="w-32 px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all"
+            />
+            <span className="text-sm text-slate-500">명</span>
+          </div>
+          <p className="text-xs text-slate-400 mt-2">정원이 차면 더 이상 수강 신청을 받지 않습니다</p>
         </div>
 
         {createMut.isError && (
