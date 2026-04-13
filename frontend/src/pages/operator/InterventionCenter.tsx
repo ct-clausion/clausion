@@ -38,9 +38,9 @@ export default function InterventionCenter() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-extrabold text-slate-900">교강사 개입 지시 센터</h1>
+        <h1 className="text-2xl font-extrabold text-slate-900">강사 개입 지시 센터</h1>
         <p className="text-sm text-slate-500 mt-1">
-          AI가 감지한 위험 학생을 교강사별로 그룹핑 - 교강사에게 직접 주의 지시를 보냅니다.
+          AI가 감지한 위험 학생을 강사별로 그룹핑 - 강사에게 직접 주의 지시를 보냅니다.
         </p>
       </div>
 
@@ -95,7 +95,7 @@ export default function InterventionCenter() {
                     <input
                       value={messageText[group.instructorId] || ''}
                       onChange={(e) => setMessageText(prev => ({ ...prev, [group.instructorId]: e.target.value }))}
-                      placeholder="교강사에게 전달할 메시지 (선택)"
+                      placeholder="강사에게 전달할 메시지 (선택)"
                       className="flex-1 px-3 py-2 rounded-lg border border-slate-300 text-sm"
                     />
                     <button
@@ -107,7 +107,7 @@ export default function InterventionCenter() {
                       disabled={directiveMutation.isPending}
                       className="px-4 py-2 rounded-lg bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-700 disabled:opacity-50 transition-colors whitespace-nowrap"
                     >
-                      교강사에게 지시
+                      강사에게 지시
                     </button>
                   </div>
                 </div>
@@ -117,7 +117,7 @@ export default function InterventionCenter() {
         </div>
       ) : (
         <GlassCard className="p-8 text-center">
-          <p className="text-slate-400">현재 교강사에게 전달할 위험 학생이 없습니다.</p>
+          <p className="text-slate-400">현재 강사에게 전달할 위험 학생이 없습니다.</p>
         </GlassCard>
       )}
 

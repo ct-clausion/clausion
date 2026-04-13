@@ -50,14 +50,14 @@ export default function OperatorDashboard() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-extrabold text-slate-900">교육 운영 대시보드</h1>
-        <p className="text-sm text-slate-500 mt-1">교강사 횡단 관리 - 과정 간 비교와 운영 의사결정</p>
+        <p className="text-sm text-slate-500 mt-1">강사 횡단 관리 - 과정 간 비교와 운영 의사결정</p>
       </div>
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
         <StatCard label="진행중 과정" value={summary?.activeCourses ?? '-'} />
         <StatCard label="총 수강생" value={summary?.totalStudents ?? '-'} />
-        <StatCard label="교강사" value={summary?.totalInstructors ?? '-'} />
+        <StatCard label="강사" value={summary?.totalInstructors ?? '-'} />
         <StatCard label="이탈 위험군" value={summary?.atRiskStudents ?? '-'} accent="text-rose-600" />
         <StatCard
           label="오늘 출석률"
@@ -107,7 +107,7 @@ export default function OperatorDashboard() {
 
         {/* Instructor Workload Summary */}
         <GlassCard className="p-5">
-          <h2 className="text-sm font-bold text-slate-900 mb-4">교강사 업무 부하</h2>
+          <h2 className="text-sm font-bold text-slate-900 mb-4">강사 업무 부하</h2>
           {workload && workload.length > 0 ? (
             <div className="space-y-3">
               {workload.map((inst) => {
@@ -141,7 +141,7 @@ export default function OperatorDashboard() {
               })}
             </div>
           ) : (
-            <p className="text-sm text-slate-400">교강사 데이터가 없습니다.</p>
+            <p className="text-sm text-slate-400">강사 데이터가 없습니다.</p>
           )}
         </GlassCard>
       </div>
@@ -149,7 +149,7 @@ export default function OperatorDashboard() {
       {/* Risk Alerts */}
       <GlassCard className="p-5">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-bold text-slate-900">이탈 위험 알림 (교강사에게 지시 필요)</h2>
+          <h2 className="text-sm font-bold text-slate-900">이탈 위험 알림 (강사에게 지시 필요)</h2>
           <button
             onClick={() => navigate('/operator/intervention')}
             className="text-xs text-indigo-600 font-medium hover:text-indigo-700 transition-colors"

@@ -19,8 +19,8 @@ export default function InstructorAnalysis() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-extrabold text-slate-900">교강사 효과성 분석</h1>
-        <p className="text-sm text-slate-500 mt-1">교강사 간 성과 비교 및 업무 부하 균형 분석 - 교강사가 볼 수 없는 횡단 비교</p>
+        <h1 className="text-2xl font-extrabold text-slate-900">강사 효과성 분석</h1>
+        <p className="text-sm text-slate-500 mt-1">강사 간 성과 비교 및 업무 부하 균형 분석 - 강사가 볼 수 없는 횡단 비교</p>
       </div>
 
       {isLoading ? (
@@ -73,13 +73,13 @@ export default function InstructorAnalysis() {
                 })}
               </div>
             ) : (
-              <p className="text-sm text-slate-400">교강사 데이터가 없습니다.</p>
+              <p className="text-sm text-slate-400">강사 데이터가 없습니다.</p>
             )}
           </GlassCard>
 
           {/* Performance Comparison Chart */}
           <GlassCard className="p-5">
-            <h2 className="text-sm font-bold text-slate-900 mb-4">학생 성과 비교 (교강사별 평균 Twin 점수)</h2>
+            <h2 className="text-sm font-bold text-slate-900 mb-4">학생 성과 비교 (강사별 평균 Twin 점수)</h2>
             {effectiveness && effectiveness.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={effectiveness} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
@@ -95,7 +95,7 @@ export default function InstructorAnalysis() {
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <p className="text-sm text-slate-400">비교할 교강사 데이터가 없습니다.</p>
+              <p className="text-sm text-slate-400">비교할 강사 데이터가 없습니다.</p>
             )}
           </GlassCard>
 

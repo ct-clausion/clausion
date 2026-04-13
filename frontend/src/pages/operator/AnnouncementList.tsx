@@ -73,7 +73,7 @@ export default function AnnouncementList() {
             >
               <option value="ALL">전체</option>
               <option value="STUDENT_ONLY">수강생만</option>
-              <option value="INSTRUCTOR_ONLY">교강사만</option>
+              <option value="INSTRUCTOR_ONLY">강사만</option>
             </select>
             <label className="flex items-center gap-2 text-sm">
               <input type="checkbox" checked={isUrgent} onChange={(e) => setIsUrgent(e.target.checked)} className="rounded" />
@@ -107,7 +107,7 @@ export default function AnnouncementList() {
                     {a.isUrgent && <span className="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 text-xs font-bold shrink-0">긴급</span>}
                     <h3 className="text-sm font-bold text-slate-900 truncate">{a.title}</h3>
                     <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 text-xs shrink-0">
-                      {a.targetType === 'ALL' ? '전체' : a.targetType === 'STUDENT_ONLY' ? '수강생' : a.targetType === 'INSTRUCTOR_ONLY' ? '교강사' : a.targetType}
+                      {a.targetType === 'ALL' ? '전체' : a.targetType === 'STUDENT_ONLY' ? '수강생' : a.targetType === 'INSTRUCTOR_ONLY' ? '강사' : a.targetType}
                     </span>
                   </div>
                   <div className="flex items-center gap-3 shrink-0 ml-3">

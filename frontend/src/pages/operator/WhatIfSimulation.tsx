@@ -64,9 +64,9 @@ export default function WhatIfSimulation() {
   };
 
   const scenarios = [
-    { value: 'ADD_CONSULTATION', label: '상담 배정', desc: '위험 수강생에게 교강사 1:1 상담을 배정하면 Twin 점수가 어떻게 변할까?' },
+    { value: 'ADD_CONSULTATION', label: '상담 배정', desc: '위험 수강생에게 강사 1:1 상담을 배정하면 Twin 점수가 어떻게 변할까?' },
     { value: 'ADD_SESSION', label: '보충 세션', desc: '난이도 높은 구간에 보충 수업을 추가하면 과정 수료율이 어떻게 변할까?' },
-    { value: 'REBALANCE_INSTRUCTOR', label: '교강사 재배정', desc: '과부하 교강사의 학생을 다른 교강사에게 이동하면 전체 성과가 어떻게 변할까?' },
+    { value: 'REBALANCE_INSTRUCTOR', label: '강사 재배정', desc: '과부하 강사의 학생을 다른 강사에게 이동하면 전체 성과가 어떻게 변할까?' },
   ];
 
   const scoreLabels: Record<string, string> = {

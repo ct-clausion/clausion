@@ -87,7 +87,7 @@ const operatorNav: NavSection[] = [
   {
     title: '횡단 분석',
     items: [
-      { id: 'instructors', label: '교강사 분석', icon: '📊', path: 'instructors' },
+      { id: 'instructors', label: '강사 분석', icon: '📊', path: 'instructors' },
       { id: 'intervention', label: '개입 지시', icon: '🚨', path: 'intervention' },
     ],
   },

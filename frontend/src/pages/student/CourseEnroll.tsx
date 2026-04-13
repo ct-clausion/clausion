@@ -49,7 +49,7 @@ export default function CourseEnroll() {
       queryClient.invalidateQueries({ queryKey: ['my-enrollments'] });
       queryClient.invalidateQueries({ queryKey: ['all-courses'] });
       setConfirm(null);
-      setSuccessMessage('수강 신청이 완료되었습니다! 교강사 승인을 기다려주세요.');
+      setSuccessMessage('수강 신청이 완료되었습니다! 강사 승인을 기다려주세요.');
       setTimeout(() => setSuccessMessage(''), 4000);
     },
     onError: (error: Error) => {

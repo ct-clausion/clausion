@@ -15,7 +15,7 @@ const summaryKeyLabels: Record<string, string> = {
   interventionCount: '개입 횟수',
   completionRate: '수료율',
   activeCourses: '진행 과정',
-  totalInstructors: '교강사 수',
+  totalInstructors: '강사 수',
   avgOverallRisk: '평균 위험도',
   newEnrollments: '신규 등록',
 };
@@ -46,12 +46,12 @@ export default function OperationReports() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-extrabold text-slate-900">AI 운영 리포트</h1>
-        <p className="text-sm text-slate-500 mt-1">교강사 횡단 분석 - 교강사가 볼 수 없는 비교 인사이트</p>
+        <p className="text-sm text-slate-500 mt-1">강사 횡단 분석 - 강사가 볼 수 없는 비교 인사이트</p>
       </div>
 
       {/* Instructor Effectiveness Comparison Chart */}
       <GlassCard className="p-5">
-        <h2 className="text-sm font-bold text-slate-900 mb-4">교강사 효과성 비교 (학생 Twin 평균)</h2>
+        <h2 className="text-sm font-bold text-slate-900 mb-4">강사 효과성 비교 (학생 Twin 평균)</h2>
         {effectiveness && effectiveness.length > 0 ? (
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={effectiveness} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
@@ -65,7 +65,7 @@ export default function OperationReports() {
             </BarChart>
           </ResponsiveContainer>
         ) : (
-          <p className="text-sm text-slate-400">교강사 데이터가 없습니다.</p>
+          <p className="text-sm text-slate-400">강사 데이터가 없습니다.</p>
         )}
         {effectiveness && effectiveness.length > 1 && (() => {
           const sorted = [...effectiveness].sort((a, b) => a.avgMastery - b.avgMastery);
@@ -77,7 +77,7 @@ export default function OperationReports() {
                 <p className="text-xs text-amber-800">
                   <span className="font-bold">AI 인사이트:</span> {lowest.name}의 학생 숙련도 평균({lowest.avgMastery.toFixed(0)})이
                   {highest.name}({highest.avgMastery.toFixed(0)})에 비해 {(highest.avgMastery - lowest.avgMastery).toFixed(0)}점 낮습니다.
-                  과정 점검 또는 교강사 지원을 권장합니다.
+                  과정 점검 또는 강사 지원을 권장합니다.
                 </p>
               </div>
             );

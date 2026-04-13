@@ -92,7 +92,7 @@ const ConsultationPage: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             className="rounded-2xl bg-indigo-50 border border-indigo-200 p-5"
           >
-            <h3 className="text-sm font-bold text-indigo-800 mb-2">교강사에게 상담 요청</h3>
+            <h3 className="text-sm font-bold text-indigo-800 mb-2">강사에게 상담 요청</h3>
             <textarea
               value={requestReason}
               onChange={(e) => setRequestReason(e.target.value)}

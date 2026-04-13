@@ -16,7 +16,7 @@ const actionLabels: Record<string, string> = {
 const targetLabels: Record<string, string> = {
   COURSE: '과정',
   STUDENT: '수강생',
-  INSTRUCTOR: '교강사',
+  INSTRUCTOR: '강사',
   ANNOUNCEMENT: '공지사항',
   ATTENDANCE: '출결',
 };

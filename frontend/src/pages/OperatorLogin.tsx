@@ -24,7 +24,7 @@ export default function OperatorLogin() {
     try {
       const user = await login(email, password);
       if (user.role !== 'OPERATOR') {
-        setError('운영자 계정이 아닙니다. 교강사/수강생은 일반 로그인 페이지를 이용하세요.');
+        setError('운영자 계정이 아닙니다. 강사/수강생은 일반 로그인 페이지를 이용하세요.');
         useAuthStore.getState().logout();
         return;
       }
@@ -156,7 +156,7 @@ export default function OperatorLogin() {
           )}
 
           <p className="text-center text-sm text-slate-500 mt-6">
-            교강사/수강생 로그인은{' '}
+            강사/수강생 로그인은{' '}
             <Link to="/login" className="text-indigo-600 font-medium hover:text-indigo-700">여기</Link>
           </p>
         </div>

@@ -11,8 +11,8 @@ export default function InstructorManagement() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-extrabold text-slate-900">교강사 관리</h1>
-        <p className="text-sm text-slate-500 mt-1">교강사 업무량 현황 및 배정 관리</p>
+        <h1 className="text-2xl font-extrabold text-slate-900">강사 관리</h1>
+        <p className="text-sm text-slate-500 mt-1">강사 업무량 현황 및 배정 관리</p>
       </div>
 
       {isLoading ? (
@@ -47,7 +47,7 @@ export default function InstructorManagement() {
             </GlassCard>
           ))}
           {instructors?.length === 0 && (
-            <p className="text-sm text-slate-400 col-span-full text-center py-8">등록된 교강사가 없습니다.</p>
+            <p className="text-sm text-slate-400 col-span-full text-center py-8">등록된 강사가 없습니다.</p>
           )}
         </div>
       )}

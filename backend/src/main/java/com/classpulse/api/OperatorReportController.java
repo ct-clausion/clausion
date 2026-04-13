@@ -99,7 +99,7 @@ public class OperatorReportController {
                     projectedScores.put("retentionRisk", Math.max(0, twin.getRetentionRiskScore().doubleValue() - 15));
                     projectedScores.put("overallRisk", Math.max(0, twin.getOverallRiskScore().doubleValue() - 10));
                     interpretation = "상담 배정 시 동기 점수가 +12, 이탈 위험이 -15% 개선될 것으로 예상됩니다. 특히 동기 부여 측면에서 가장 큰 효과가 기대됩니다.";
-                    recommendation = "즉시 상담 배정을 권장합니다. 교강사와의 1:1 면담이 이 수강생의 학습 지속에 가장 효과적인 개입입니다.";
+                    recommendation = "즉시 상담 배정을 권장합니다. 강사와의 1:1 면담이 이 수강생의 학습 지속에 가장 효과적인 개입입니다.";
                     confidence = 0.82;
                     break;
                 case "ADD_SESSION":
@@ -159,7 +159,7 @@ public class OperatorReportController {
                 m.put("urgency", "HIGH");
                 m.put("expectedImpact", "이탈 위험 -20% 예상");
             } else {
-                m.put("suggestedAction", "교강사에게 주의 알림 + 학습 점검");
+                m.put("suggestedAction", "강사에게 주의 알림 + 학습 점검");
                 m.put("urgency", "MEDIUM");
                 m.put("expectedImpact", "이탈 위험 -10% 예상");
             }
