@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
+import { consultationsApi } from '../../api/consultations';
 
 interface UpcomingConsultation {
   id: string;
@@ -8,19 +9,23 @@ interface UpcomingConsultation {
   briefingReady: boolean;
 }
 
-const MOCK_CONSULTATIONS: UpcomingConsultation[] = [
-  { id: 'uc1', time: '10:00', studentName: '정예린', briefingReady: true },
-  { id: 'uc2', time: '11:30', studentName: '오민서', briefingReady: true },
-  { id: 'uc3', time: '14:00', studentName: '황시우', briefingReady: false },
-  { id: 'uc4', time: '15:30', studentName: '백승현', briefingReady: true },
-];
-
 export default function UpcomingConsultationPanel() {
   const navigate = useNavigate();
 
-  const { data: consultations = MOCK_CONSULTATIONS } = useQuery({
+  const { data: consultations = [] } = useQuery<UpcomingConsultation[]>({
     queryKey: ['instructor', 'upcoming-consultations'],
-    queryFn: async () => MOCK_CONSULTATIONS,
+    queryFn: async () => {
+      const all = await consultationsApi.getConsultations('instructor');
+      const today = new Date().toISOString().slice(0, 10);
+      return all
+        .filter((c) => c.status === 'SCHEDULED' && c.scheduledAt?.startsWith(today))
+        .map((c) => ({
+          id: String(c.id),
+          time: new Date(c.scheduledAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
+          studentName: c.studentName ?? '학생',
+          briefingReady: !!c.briefingJson,
+        }));
+    },
     staleTime: 30_000,
   });
 

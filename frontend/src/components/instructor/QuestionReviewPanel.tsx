@@ -24,11 +24,10 @@ export default function QuestionReviewPanel() {
   const courseId = useCourseId();
   const [actionedIds, setActionedIds] = useState<Set<string>>(new Set());
 
-  const { data: questions = MOCK_QUESTIONS } = useQuery({
+  const { data: questions = [] } = useQuery({
     queryKey: ['instructor', 'questions', 'pending', courseId],
     queryFn: () => questionsApi.getQuestions(courseId!, { approvalStatus: 'PENDING' }),
     enabled: !!courseId,
-    placeholderData: MOCK_QUESTIONS,
     staleTime: 30_000,
   });
 

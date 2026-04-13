@@ -1,7 +1,7 @@
 package com.classpulse.config;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
@@ -11,7 +11,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 @Configuration
-@ConditionalOnProperty(name = "app.aws.s3.access-key")
+@ConditionalOnExpression("!'${app.aws.s3.access-key:}'.isEmpty()")
 public class S3Config {
 
     @Value("${app.aws.s3.region:ap-northeast-2}")

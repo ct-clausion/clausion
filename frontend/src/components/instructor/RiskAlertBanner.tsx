@@ -27,11 +27,10 @@ export default function RiskAlertBanner() {
   const { user } = useAuthStore();
   const [callingStudentId, setCallingStudentId] = useState<string | null>(null);
 
-  const { data: students = MOCK_RISK_STUDENTS } = useQuery({
+  const { data: students = [] } = useQuery({
     queryKey: ['instructor', 'risk-alerts', courseId],
     queryFn: async () => {
       const entries = await instructorApi.getCourseStudents(courseId!);
-      // Filter high-risk students (overallRiskScore >= 0.5) and map to UI format
       return entries
         .filter((e) => Number(e.overallRiskScore) >= 0.5)
         .map((e) => {
@@ -44,7 +43,6 @@ export default function RiskAlertBanner() {
         });
     },
     enabled: !!courseId,
-    placeholderData: MOCK_RISK_STUDENTS,
     staleTime: 30_000,
   });
 

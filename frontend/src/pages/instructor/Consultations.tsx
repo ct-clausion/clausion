@@ -86,10 +86,9 @@ export default function Consultations() {
   const [summaryModalOpen, setSummaryModalOpen] = useState(false);
   const [selectedConsultation, setSelectedConsultation] = useState<Consultation | null>(null);
 
-  const { data: consultations = MOCK_CONSULTATIONS } = useQuery({
+  const { data: consultations = [] } = useQuery({
     queryKey: ['instructor', 'consultations'],
     queryFn: () => consultationsApi.getConsultations('instructor'),
-    placeholderData: MOCK_CONSULTATIONS,
     staleTime: 30_000,
   });
 
@@ -216,7 +215,7 @@ export default function Consultations() {
           workspace={
             <div className="h-full flex flex-col gap-3">
               <div className="flex-1">
-                <VideoPanel onEndCall={endConsultation} />
+                <VideoPanel consultationId={Number(activeConsultationId)} role="instructor" onEndCall={endConsultation} />
               </div>
               <div className="h-48">
                 <LiveNotes />
