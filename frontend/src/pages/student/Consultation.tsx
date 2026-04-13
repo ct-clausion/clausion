@@ -42,6 +42,7 @@ const ConsultationPage: React.FC = () => {
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
   const [showRequestForm, setShowRequestForm] = useState(false);
   const [requestReason, setRequestReason] = useState('');
+  const [editingConsultationId, setEditingConsultationId] = useState<string | null>(null);
 
   // Fetch enrolled courses
   const { data: enrollments = [] } = useQuery<
@@ -87,6 +88,16 @@ const ConsultationPage: React.FC = () => {
     },
   });
 
+  const updateNotesMutation = useMutation({
+    mutationFn: () => consultationsApi.updateNotes(editingConsultationId!, requestReason),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['consultations'] });
+      setShowRequestForm(false);
+      setRequestReason('');
+      setEditingConsultationId(null);
+    },
+  });
+
   const rejectMutation = useMutation({
     mutationFn: (consultationId: string) => consultationsApi.rejectConsultation(consultationId),
     onSuccess: () => {
@@ -99,6 +110,8 @@ const ConsultationPage: React.FC = () => {
 
   const pastConsultations = (consultations ?? []).filter((c) => c.status === 'COMPLETED');
   const requestedConsultations = (consultations ?? []).filter((c) => c.status === 'REQUESTED');
+  const existingRequest = requestedConsultations[0] ?? null;
+  const hasActiveRequest = !!existingRequest;
   const scheduledConsultations = (consultations ?? []).filter((c) => c.status === 'SCHEDULED');
   const rejectedConsultations = (consultations ?? []).filter((c) => c.status === 'REJECTED');
 
@@ -132,10 +145,31 @@ const ConsultationPage: React.FC = () => {
             )}
             {courseId && (
               <button
-                onClick={() => setShowRequestForm(!showRequestForm)}
-                className="px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition-colors"
+                onClick={() => {
+                  if (showRequestForm) {
+                    setShowRequestForm(false);
+                    setEditingConsultationId(null);
+                    setRequestReason('');
+                  } else {
+                    if (hasActiveRequest) {
+                      setEditingConsultationId(existingRequest.id);
+                      setRequestReason(existingRequest.notes ?? '');
+                    } else {
+                      setEditingConsultationId(null);
+                      setRequestReason('');
+                    }
+                    setShowRequestForm(true);
+                  }
+                }}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  showRequestForm
+                    ? 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+                    : hasActiveRequest
+                      ? 'bg-amber-500 text-white hover:bg-amber-600'
+                      : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                }`}
               >
-                {showRequestForm ? '취소' : '상담 요청'}
+                {showRequestForm ? '취소' : hasActiveRequest ? '요청 수정' : '상담 요청'}
               </button>
             )}
           </div>
@@ -148,23 +182,31 @@ const ConsultationPage: React.FC = () => {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="rounded-2xl bg-indigo-50 border border-indigo-200 p-5"
+            className={`rounded-2xl p-5 ${editingConsultationId ? 'bg-amber-50 border border-amber-200' : 'bg-indigo-50 border border-indigo-200'}`}
           >
-            <h3 className="text-sm font-bold text-indigo-800 mb-2">강사에게 상담 요청</h3>
+            <h3 className={`text-sm font-bold mb-2 ${editingConsultationId ? 'text-amber-800' : 'text-indigo-800'}`}>
+              {editingConsultationId ? '상담 요청 수정' : '강사에게 상담 요청'}
+            </h3>
             <textarea
               value={requestReason}
               onChange={(e) => setRequestReason(e.target.value)}
               placeholder="상담을 요청하는 이유를 입력하세요 (선택사항)"
               rows={3}
-              className="w-full px-4 py-2.5 rounded-lg border border-indigo-200 bg-white text-sm resize-none mb-3"
+              className={`w-full px-4 py-2.5 rounded-lg bg-white text-sm resize-none mb-3 border ${editingConsultationId ? 'border-amber-200' : 'border-indigo-200'}`}
             />
-            <button
-              onClick={() => requestMutation.mutate()}
-              disabled={requestMutation.isPending}
-              className="px-6 py-2 rounded-lg bg-indigo-600 text-white text-sm font-bold hover:bg-indigo-700 disabled:opacity-50 transition-colors"
-            >
-              {requestMutation.isPending ? '요청 중...' : '상담 요청 보내기'}
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => editingConsultationId ? updateNotesMutation.mutate() : requestMutation.mutate()}
+                disabled={requestMutation.isPending || updateNotesMutation.isPending}
+                className={`px-6 py-2 rounded-lg text-white text-sm font-bold disabled:opacity-50 transition-colors ${
+                  editingConsultationId ? 'bg-amber-500 hover:bg-amber-600' : 'bg-indigo-600 hover:bg-indigo-700'
+                }`}
+              >
+                {(requestMutation.isPending || updateNotesMutation.isPending)
+                  ? '처리 중...'
+                  : editingConsultationId ? '수정 완료' : '상담 요청 보내기'}
+              </button>
+            </div>
           </motion.div>
         )}
 

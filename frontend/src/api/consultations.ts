@@ -41,6 +41,10 @@ export const consultationsApi = {
     return api.put<Consultation>(`/api/consultations/${consultationId}/reject`, reason ? { reason } : {});
   },
 
+  updateNotes(consultationId: string, notes: string): Promise<Consultation> {
+    return api.put<Consultation>(`/api/consultations/${consultationId}/notes`, { notes });
+  },
+
   saveSummary(
     consultationId: string,
     data: { summaryText: string; causeAnalysis?: string; actionPlanJson: string },
