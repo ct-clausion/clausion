@@ -130,7 +130,7 @@ function CourseSelector() {
   const { data: courses = [] } = useCourses();
   const { selectedCourseId, setSelectedCourseId } = useCourseStore();
 
-  if (courses.length <= 1) return null;
+  if (courses.length === 0) return null;
 
   const current = selectedCourseId ?? courses[0]?.id?.toString();
 
