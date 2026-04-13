@@ -339,14 +339,16 @@ export default function QuestionBank() {
                   {q.approvalStatus === 'PENDING' && (
                     <>
                       <button
-                        onClick={() => approveMutation.mutate({ id: q.id, status: 'APPROVED' })}
-                        className="px-3 py-1.5 text-xs font-medium rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
+                        onClick={() => approveMutation.mutate({ id: String(q.id), status: 'APPROVED' })}
+                        disabled={approveMutation.isPending}
+                        className="px-3 py-1.5 text-xs font-medium rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors disabled:opacity-50"
                       >
                         승인
                       </button>
                       <button
-                        onClick={() => approveMutation.mutate({ id: q.id, status: 'REJECTED' })}
-                        className="px-3 py-1.5 text-xs font-medium rounded-lg bg-white border border-slate-300 text-slate-600 hover:bg-slate-50 transition-colors"
+                        onClick={() => approveMutation.mutate({ id: String(q.id), status: 'REJECTED' })}
+                        disabled={approveMutation.isPending}
+                        className="px-3 py-1.5 text-xs font-medium rounded-lg bg-white border border-slate-300 text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50"
                       >
                         반려
                       </button>
@@ -434,7 +436,7 @@ export default function QuestionBank() {
                   <>
                     <button
                       onClick={() => {
-                        approveMutation.mutate({ id: dq.id, status: 'APPROVED' });
+                        approveMutation.mutate({ id: String(dq.id), status: 'APPROVED' });
                         setDetailQuestion(null);
                       }}
                       className="flex-1 py-2.5 text-sm font-semibold rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
@@ -443,7 +445,7 @@ export default function QuestionBank() {
                     </button>
                     <button
                       onClick={() => {
-                        approveMutation.mutate({ id: dq.id, status: 'REJECTED' });
+                        approveMutation.mutate({ id: String(dq.id), status: 'REJECTED' });
                         setDetailQuestion(null);
                       }}
                       className="flex-1 py-2.5 text-sm font-semibold rounded-xl bg-white border border-slate-300 text-slate-600 hover:bg-slate-50 transition-colors"
