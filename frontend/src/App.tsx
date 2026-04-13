@@ -24,6 +24,7 @@ import StudentCourseEnroll from './pages/student/CourseEnroll';
 import StudentVideoCall from './pages/student/VideoCall';
 import StudentAnnouncements from './pages/student/Announcements';
 import StudentAttendance from './pages/student/Attendance';
+import StudentPractice from './pages/student/Practice';
 
 // Operator Pages
 import OperatorDashboard from './pages/operator/Dashboard';
@@ -159,6 +160,7 @@ export default function App() {
             <Route index element={<StudentDashboard />} />
             <Route path="courses" element={<StudentCourseEnroll />} />
             <Route path="review" element={<StudentReview />} />
+            <Route path="practice" element={<StudentPractice />} />
             <Route path="reflection" element={<StudentReflection />} />
             <Route path="study-groups" element={<StudentStudyGroups />} />
             <Route path="study-groups/:groupId/chat" element={<StudentGroupChat />} />
