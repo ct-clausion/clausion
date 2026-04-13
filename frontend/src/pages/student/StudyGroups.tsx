@@ -261,8 +261,12 @@ export default function StudyGroups() {
                 group={group}
                 index={i}
                 isMine={isMember(group)}
+                isLeader={isLeader(group)}
+                userId={userId}
                 onJoin={() => setConfirm({ type: 'join', groupId: group.id, groupName: group.name })}
                 onLeave={() => setConfirm({ type: 'leave', groupId: group.id, groupName: group.name })}
+                onDelete={() => setConfirm({ type: 'delete', groupId: group.id, groupName: group.name })}
+                onKick={(studentId, name) => setConfirm({ type: 'kick', groupId: group.id, groupName: group.name, targetStudentId: studentId, targetName: name })}
                 joining={joinMut.isPending}
                 leaving={leaveMut.isPending}
               />
