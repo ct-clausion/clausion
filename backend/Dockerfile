@@ -28,4 +28,4 @@ USER appuser
 
 EXPOSE 8080
 
-ENTRYPOINT ["sh", "-c", "java -Dapp.jwt.secret=${JWT_SECRET:-default-secret-key-change-in-production-must-be-at-least-256-bits-long} -Dapp.jwt.expiration=${JWT_EXPIRATION:-86400000} -jar app.jar"]
+ENTRYPOINT ["sh", "-c", "java -Dapp.jwt.secret=${JWT_SECRET:?JWT_SECRET env var is required} -Dapp.jwt.expiration=${JWT_EXPIRATION:-86400000} -jar app.jar"]

@@ -56,7 +56,9 @@ app:
     enabled: false
 
   jwt:
-    secret: ${JWT_SECRET:default-secret-key-change-in-production-must-be-at-least-256-bits-long}
+    # JWT_SECRET must be set via environment variable — there is no safe default.
+    # Generate one with: openssl rand -base64 48
+    secret: ${JWT_SECRET:}
     expiration: 86400000
 
   openai:
@@ -66,8 +68,9 @@ app:
     timeout: 60000
 
   livekit:
-    api-key: ${LIVEKIT_API_KEY:devkey}
-    api-secret: ${LIVEKIT_API_SECRET:secretsecretsecretsecretsecretsecret}
+    # LIVEKIT_API_KEY / LIVEKIT_API_SECRET must be injected by the deployment environment.
+    api-key: ${LIVEKIT_API_KEY:}
+    api-secret: ${LIVEKIT_API_SECRET:}
     url: ${LIVEKIT_URL:wss://clausion-3gmrm9tj.livekit.cloud}
 
   cors:

@@ -1,12 +1,20 @@
 vibe-coding
-application-dev.yml
-application-local.yml
-.env
-.env.local
-.env.production
 .claude-octopus
 .claude
 .playwright-mcp
+
+# ── Secrets / local config — never commit ──
+.env
+.env.*
+!.env.example
+application-dev.yml
+application-local.yml
+application-*.local.yml
+secrets/
+credentials.json
+*.pem
+*.key
+!gradle/wrapper/gradle-wrapper.jar.key
 
 ### macOS ###
 .DS_Store

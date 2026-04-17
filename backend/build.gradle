@@ -73,3 +73,27 @@ tasks.named('jar') {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+// Load ../.env into bootRun environment so local `./gradlew bootRun` picks up secrets
+// the same way docker-compose does. Values already present in the shell env win.
+tasks.named('bootRun') {
+    def envFile = rootProject.file('../.env')
+    if (envFile.exists()) {
+        envFile.readLines('UTF-8').each { line ->
+            def trimmed = line.trim()
+            if (trimmed.isEmpty() || trimmed.startsWith('#')) return
+            def idx = trimmed.indexOf('=')
+            if (idx <= 0) return
+            def key = trimmed.substring(0, idx).trim()
+            def value = trimmed.substring(idx + 1).trim()
+            // Strip surrounding quotes if present
+            if ((value.startsWith('"') && value.endsWith('"'))
+                    || (value.startsWith("'") && value.endsWith("'"))) {
+                value = value.substring(1, value.length() - 1)
+            }
+            if (!System.getenv().containsKey(key)) {
+                environment key, value
+            }
+        }
+    }
+}

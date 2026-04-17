@@ -61,7 +61,7 @@ services:
       - "7882:7882/udp"
     command: --dev
     environment:
-      LIVEKIT_KEYS: "${LIVEKIT_API_KEY:-devkey}: ${LIVEKIT_API_SECRET:-devsecret}"
+      LIVEKIT_KEYS: "${LIVEKIT_API_KEY:?LIVEKIT_API_KEY is required}: ${LIVEKIT_API_SECRET:?LIVEKIT_API_SECRET is required}"
 
   # ── Backend (Spring Boot) ──────────────────────────
   backend:
@@ -94,15 +94,15 @@ services:
       RABBITMQ_PORT: 5672
       RABBITMQ_USERNAME: classpulse
       RABBITMQ_PASSWORD: dev_password
-      # LiveKit
+      # LiveKit — must be set in root .env; app refuses to start with placeholders
       LIVEKIT_HOST: http://livekit:7880
-      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY:-devkey}
-      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET:-devsecret}
+      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY:?LIVEKIT_API_KEY is required}
+      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET:?LIVEKIT_API_SECRET is required}
       # OpenAI
       OPENAI_API_KEY: ${OPENAI_API_KEY:-sk-placeholder}
       OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o}
-      # JWT
-      JWT_SECRET: ${JWT_SECRET:-classpulse-jwt-secret-key-for-dev-only-change-in-prod}
+      # JWT — must be set in root .env; generate with `openssl rand -base64 48`
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
       JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
       # Spring
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
