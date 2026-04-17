@@ -92,11 +92,10 @@ public class StudentAttendanceController {
         Long studentId = SecurityUtil.getCurrentUserId();
         Long sessionId = Long.valueOf(body.get("sessionId").toString());
 
-        // 해당 세션에 본인의 출결 레코드가 있는지 확인
-        AttendanceRecord record = attendanceRepository.findBySessionId(sessionId)
-                .stream()
-                .filter(a -> a.getStudentId().equals(studentId))
-                .findFirst()
+        // PESSIMISTIC_WRITE lock — concurrent double-clicks can't both pass the status
+        // check and double-mark PRESENT.
+        AttendanceRecord record = attendanceRepository
+                .findBySessionIdAndStudentIdForUpdate(sessionId, studentId)
                 .orElse(null);
 
         if (record == null) {

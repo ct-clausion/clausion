@@ -9,8 +9,10 @@ import com.classpulse.domain.user.UserRepository;
 import com.classpulse.notification.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
@@ -55,10 +57,25 @@ public class GamificationService {
 
     /**
      * XP 이벤트를 추가하고 학생의 게이미피케이션 상태를 업데이트합니다.
+     * 낙관적 락 충돌(동시 XP 수여) 시 최대 3회 재시도합니다.
      */
-    @Transactional
     public Map<String, Object> addXpEvent(Long studentId, Long courseId, String eventType,
                                            Integer amount, Long sourceId, String sourceType) {
+        int attempts = 0;
+        while (true) {
+            try {
+                return doAddXpEvent(studentId, courseId, eventType, amount, sourceId, sourceType);
+            } catch (OptimisticLockingFailureException e) {
+                attempts++;
+                if (attempts >= 3) throw e;
+                log.debug("XP award race on student={} course={}, retry {}/3", studentId, courseId, attempts);
+            }
+        }
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public Map<String, Object> doAddXpEvent(Long studentId, Long courseId, String eventType,
+                                             Integer amount, Long sourceId, String sourceType) {
         User student = userRepository.findById(studentId)
                 .orElseThrow(() -> new IllegalArgumentException("Student not found: " + studentId));
         Course course = courseRepository.findById(courseId)

@@ -50,6 +50,14 @@ public class StudentGamification {
     @Builder.Default
     private Integer totalXpEarned = 0;
 
+    // Optimistic lock. Two concurrent XP awards for the same (student, course) can't
+    // both read the same current_xp and overwrite each other — one of them will fail
+    // with OptimisticLockingFailureException and retry.
+    @Version
+    @Column(name = "lock_version")
+    @Builder.Default
+    private Long lockVersion = 0L;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

@@ -135,7 +135,9 @@ public class CourseController {
                     .body(java.util.Map.of("message", "이미 수강 신청한 과정입니다."));
         }
 
-        Course course = courseRepository.findById(id)
+        // Acquire row lock FIRST so the capacity check below is serialized across
+        // concurrent enrollments for the same course.
+        Course course = courseRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new IllegalArgumentException("Course not found: " + id));
 
         // Capacity check
