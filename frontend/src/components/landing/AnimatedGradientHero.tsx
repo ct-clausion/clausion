@@ -62,7 +62,7 @@ export default function AnimatedGradientHero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.15 }}
-          className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-tight mb-6"
+          className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-tight mb-6 break-keep"
         >
           학생별 AI 학습 분신이{' '}
           <br className="hidden md:block" />
@@ -82,7 +82,7 @@ export default function AnimatedGradientHero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
-          className="text-lg text-white/60 max-w-2xl mx-auto mb-10 leading-relaxed"
+          className="text-lg text-white/60 max-w-2xl mx-auto mb-10 leading-relaxed break-keep"
         >
           디지털 트윈이 학생의 이해도와 망각 위험을 실시간으로 분석하고,
           강사에게 최적의 상담 타이밍과 과제를 제안합니다.
