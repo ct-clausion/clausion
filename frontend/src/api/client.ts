@@ -16,6 +16,22 @@ function getToken(): string | null {
   return localStorage.getItem('token');
 }
 
+// Guard against multiple concurrent 401s triggering duplicate logouts / navigations.
+let unauthorizedHandled = false;
+
+async function handleUnauthorized(): Promise<void> {
+  if (unauthorizedHandled) return;
+  unauthorizedHandled = true;
+  // Dynamic import avoids a circular dep (authStore imports this module for api.post).
+  const { useAuthStore } = await import('../store/authStore');
+  useAuthStore.getState().logout();
+  // AuthSessionSync in App.tsx reacts to the token becoming null and navigates via
+  // react-router. Reset the guard after a tick so subsequent sessions can re-trigger.
+  setTimeout(() => {
+    unauthorizedHandled = false;
+  }, 0);
+}
+
 async function request<T>(
   method: string,
   path: string,
@@ -38,14 +54,8 @@ async function request<T>(
   });
 
   if (!res.ok) {
-    if (res.status === 401) {
-      const isAuth = path.startsWith('/api/auth/login') || path.startsWith('/api/auth/register');
-      if (!isAuth && token) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        window.location.href = '/login';
-        throw new Error('Authentication failed');
-      }
+    if (res.status === 401 && !isAuthEndpoint && token) {
+      await handleUnauthorized();
     }
     const errorBody = await res.json().catch(() => null);
     const message =

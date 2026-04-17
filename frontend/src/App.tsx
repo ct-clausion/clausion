@@ -74,15 +74,24 @@ function AuthSessionSync() {
   }, [syncFromStorage]);
 
   useEffect(() => {
+    // Multiple signals can ask us to reconcile at once (pageshow + focus fire together
+    // on tab return). Coalesce with a microtask-sized guard so navigate() isn't
+    // called several times in the same frame.
+    let pending = false;
     const reconcileAuth = () => {
-      syncFromStorage();
-      const { token: latestToken, user: latestUser } = useAuthStore.getState();
-      if (!latestToken || !latestUser) {
-        queryClientInstance.clear();
-        if (!isPublicPath(window.location.pathname)) {
-          navigate('/login', { replace: true });
+      if (pending) return;
+      pending = true;
+      queueMicrotask(() => {
+        pending = false;
+        syncFromStorage();
+        const { token: latestToken, user: latestUser } = useAuthStore.getState();
+        if (!latestToken || !latestUser) {
+          queryClientInstance.clear();
+          if (!isPublicPath(window.location.pathname)) {
+            navigate('/login', { replace: true });
+          }
         }
-      }
+      });
     };
 
     const handleVisibilityChange = () => {

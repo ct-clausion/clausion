@@ -39,10 +39,33 @@ export default function OperatorLogin() {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
 
+    // Client-side validation — operator has elevated privileges so password rules are stricter.
+    const trimmedName = name.trim();
+    const trimmedEmail = email.trim();
+    const trimmedInvite = inviteCode.trim();
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail);
+
+    if (!trimmedEmail || !emailOk) {
+      setError('올바른 이메일 주소를 입력해주세요.');
+      return;
+    }
+    if (!trimmedName) {
+      setError('이름을 입력해주세요.');
+      return;
+    }
+    if (password.length < 8) {
+      setError('비밀번호는 8자 이상이어야 합니다.');
+      return;
+    }
+    if (!trimmedInvite) {
+      setError('초대 코드를 입력해주세요.');
+      return;
+    }
+
+    setLoading(true);
     try {
-      await register(email, password, name, 'OPERATOR', inviteCode);
+      await register(trimmedEmail, password, trimmedName, 'OPERATOR', trimmedInvite);
       navigate('/operator', { replace: true });
     } catch {
       setError('가입에 실패했습니다. 초대 코드가 유효한지 확인해주세요.');

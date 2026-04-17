@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import VideoControls from './VideoControls';
 import { useLiveKit } from '../../hooks/useLiveKit';
-import { consultationsApi } from '../../api/consultations';
 
 interface VideoPanelProps {
   consultationId: number;
@@ -32,21 +31,19 @@ export default function VideoPanel({
     error,
   } = useLiveKit({ consultationId, role });
 
-  // Auto-connect on mount (use preToken from start-video if available)
+  // Auto-connect on mount, ensure full teardown on unmount (prevents camera/mic leak)
   useEffect(() => {
     connect(preToken, preRoomName);
+    return () => {
+      // Fire-and-forget: releases media tracks and notifies server even when user navigates away.
+      void disconnect();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleEndCall = async () => {
-    disconnect();
-    if (consultationId) {
-      try {
-        await consultationsApi.endVideo(String(consultationId));
-      } catch {
-        // Navigation still proceeds even if lifecycle sync fails.
-      }
-    }
+    // disconnect() already calls /end-video internally — do not duplicate.
+    await disconnect();
     await onEndCall?.();
   };
 

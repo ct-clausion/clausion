@@ -52,6 +52,9 @@ export function useLiveKit({
   const audioElementsRef = useRef<HTMLElement[]>([]);
   const isConnectedRef = useRef(false);
   const isConnectingRef = useRef(false);
+  // Ensures disconnect() is only executed once per session — both handleEndCall
+  // and the unmount cleanup call it, we must not hit /end-video twice.
+  const isDisconnectingRef = useRef(false);
 
   const cleanupAudioElements = useCallback(() => {
     audioElementsRef.current.forEach((el) => {
@@ -87,6 +90,7 @@ export function useLiveKit({
       if (isConnectedRef.current || isConnectingRef.current) return;
 
       isConnectingRef.current = true;
+      isDisconnectingRef.current = false;
       setIsConnecting(true);
       setError(null);
 
@@ -211,6 +215,10 @@ export function useLiveKit({
   );
 
   const disconnect = useCallback(async () => {
+    // Idempotent: a second call (e.g., unmount cleanup after a manual end-call) is a no-op.
+    if (isDisconnectingRef.current) return;
+    isDisconnectingRef.current = true;
+
     // Call end-video API to update server state
     try {
       const BASE_URL = import.meta.env.VITE_API_URL ?? '';

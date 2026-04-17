@@ -17,29 +17,41 @@ export default function IncomingCallModal({
   onReject,
 }: IncomingCallModalProps) {
   useEffect(() => {
-    if (visible) {
-      // Play ringtone using Web Audio oscillator (no external file needed)
-      const ctx = new AudioContext();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.value = 440;
-      gain.gain.value = 0.15;
-      osc.connect(gain).connect(ctx.destination);
-      osc.start();
+    if (!visible) return;
 
-      // Pulsing ring pattern
-      const interval = setInterval(() => {
-        gain.gain.setValueAtTime(0.15, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
-      }, 1000);
+    // Play ringtone using Web Audio oscillator (no external file needed).
+    // Modern browsers start AudioContext in "suspended" state until a user gesture;
+    // if we don't resume it here, the ringtone stays silent even though the code "ran".
+    const AudioCtxCtor =
+      window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!AudioCtxCtor) return;
 
-      return () => {
-        clearInterval(interval);
-        osc.stop();
-        ctx.close();
-      };
+    const ctx = new AudioCtxCtor();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = 440;
+    gain.gain.value = 0.15;
+    osc.connect(gain).connect(ctx.destination);
+    osc.start();
+
+    // Best-effort resume. If the browser still blocks (no user gesture yet),
+    // the ringtone will start as soon as the user interacts with the page.
+    if (ctx.state === 'suspended') {
+      void ctx.resume().catch(() => { /* no-op: start silent rather than crash */ });
     }
+
+    // Pulsing ring pattern
+    const interval = setInterval(() => {
+      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+    }, 1000);
+
+    return () => {
+      clearInterval(interval);
+      try { osc.stop(); } catch { /* already stopped */ }
+      void ctx.close().catch(() => { /* already closed */ });
+    };
   }, [visible]);
 
   return (

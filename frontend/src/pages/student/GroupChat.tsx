@@ -54,22 +54,39 @@ export default function GroupChat() {
     retry: false,
   });
 
-  // Fetch chat history
+  // Fetch chat history. WS is the source of truth for live updates while the user
+  // is in the room, so focus-refetch is disabled (it would clobber WS deltas). On
+  // remount (room re-entry), we still want fresh history — the merge effect below
+  // preserves any in-flight WS messages.
   const { data: history, error: historyError } = useQuery<GroupChatMessage[]>({
     queryKey: ['group-chat-history', groupId],
     queryFn: () => groupChatApi.getMessages(groupId!),
     enabled: !!groupId,
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false,
+    refetchOnMount: true,
     refetchInterval: false,
     staleTime: 0,
     retry: false,
   });
 
-  // Load history into messages when entering or switching rooms
+  // Clear buffered messages when switching rooms so the next merge doesn't leak
+  // the previous group's messages into the new one.
   useEffect(() => {
-    if (history) {
-      setMessages(history);
-    }
+    setMessages([]);
+  }, [groupId]);
+
+  // Merge history with any messages already buffered from the WS subscription.
+  // Prevents losing messages that arrive between first render and initial history fetch.
+  useEffect(() => {
+    if (!history) return;
+    setMessages((prev) => {
+      const byId = new Map<number, GroupChatMessage>();
+      for (const m of history) byId.set(m.id, m);
+      for (const m of prev) if (!byId.has(m.id)) byId.set(m.id, m);
+      return Array.from(byId.values()).sort(
+        (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+      );
+    });
   }, [history, groupId]);
 
   useEffect(() => {
@@ -104,8 +121,11 @@ export default function GroupChat() {
     const apiUrl = import.meta.env.VITE_API_URL ?? '';
     const wsUrl = apiUrl ? apiUrl.replace(/^http/, 'ws') : `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}`;
 
+    // Token is sent via the STOMP CONNECT frame (connectHeaders), never in the URL.
+    // The server's StompChannelInterceptor validates it at the frame level.
     const client = new Client({
-      brokerURL: `${wsUrl}/ws-chat?token=${token}`,
+      brokerURL: `${wsUrl}/ws-chat`,
+      connectHeaders: { Authorization: `Bearer ${token}` },
       reconnectDelay: 5000,
       heartbeatIncoming: 10000,
       heartbeatOutgoing: 10000,

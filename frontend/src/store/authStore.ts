@@ -75,6 +75,12 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   logout: () => {
+    // Fire-and-forget: tell backend to revoke the token. We always clear local state
+    // whether or not the network call succeeds (user expects to be logged out).
+    const token = localStorage.getItem('token');
+    if (token) {
+      void api.post('/api/auth/logout').catch(() => { /* best-effort */ });
+    }
     clearPersistedAuth();
     set({ user: null, token: null, isAuthenticated: false });
   },

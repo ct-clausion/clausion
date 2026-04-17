@@ -50,9 +50,6 @@ export const operatorApi = {
   getStudents: () =>
     api.get<Array<{ id: string; name: string; email: string; courseId: string | null; courseTitle: string; overallRisk: number; trend: string; attendanceRate: number }>>('/api/operator/students'),
 
-  getAtRiskStudents: () =>
-    api.get<Array<{ id: string; name: string; courseId: string; courseTitle: string; overallRisk: number; trend: string; consecutiveAbsences: number; aiSuggestion: string }>>('/api/operator/students/at-risk'),
-
   createIntervention: (data: { studentId: string; courseId: string; interventionType: string; description: string; aiSuggested?: boolean }) =>
     api.post<InterventionLog>('/api/operator/interventions', data),
 
@@ -119,6 +116,16 @@ export const operatorApi = {
     api.get<Array<{ studentId: string; studentName: string; courseTitle: string; suggestedAction: string; expectedImpact: string; urgency: string }>>('/api/operator/ai/intervention-suggestions'),
 
   // ── Audit ──────────────────────────────────────────────────
-  getAuditLogs: (page = 0, size = 20) =>
-    api.get<{ content: OperatorAuditLog[]; totalPages: number; totalElements: number }>(`/api/operator/audit-logs?page=${page}&size=${size}`),
+  getAuditLogs: (
+    page = 0,
+    size = 20,
+    filters?: { actionType?: string; targetType?: string },
+  ) => {
+    const qs = new URLSearchParams({ page: String(page), size: String(size) });
+    if (filters?.actionType) qs.set('actionType', filters.actionType);
+    if (filters?.targetType) qs.set('targetType', filters.targetType);
+    return api.get<{ content: OperatorAuditLog[]; totalPages: number; totalElements: number }>(
+      `/api/operator/audit-logs?${qs.toString()}`,
+    );
+  },
 };

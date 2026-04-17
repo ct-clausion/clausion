@@ -142,7 +142,7 @@ export default function QuestionBank() {
 
   const filtered = questions.filter((q) => {
     if (filter !== 'ALL' && q.approvalStatus !== filter) return false;
-    if (skillFilter !== 'ALL' && q.skillId !== skillFilter) return false;
+    if (skillFilter !== 'ALL' && String(q.skillId ?? '') !== skillFilter) return false;
     return true;
   });
 

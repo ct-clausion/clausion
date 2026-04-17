@@ -20,7 +20,11 @@ export default function InterventionCenter() {
   const directiveMutation = useMutation({
     mutationFn: operatorApi.sendInterventionDirective,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['operator'] });
+      // Narrow invalidation: a directive only affects the at-risk grouping and the
+      // directive history. Avoid invalidating the whole `['operator']` prefix,
+      // which would force every operator page to refetch.
+      queryClient.invalidateQueries({ queryKey: ['operator', 'intervention-center'] });
+      queryClient.invalidateQueries({ queryKey: ['operator', 'intervention-directives'] });
       setMessageText({});
     },
   });
